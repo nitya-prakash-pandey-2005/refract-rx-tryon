@@ -53,11 +53,13 @@ About 35–40 units per full profile. The app keeps a units ledger, and the face
 npm install
 cp .env.example .env        # add YOUCAM_API_KEY (and optionally ANTHROPIC_API_KEY)
 npm run dev                 # http://localhost:5190 (app + API on one port)
-npm test                    # 38 unit tests: optics, fit, PD, makeup rules, placement, normalisers, agent
+npm test                    # 46 unit tests: optics, fit, PD, makeup rules, placement, normalisers, agent, limits
 npm run build               # production build in dist/
 ```
 
-**No keys?** Open the app and pick a sample profile (Lena −6.50, Helen +2.75). Sample profiles replay real YouCam responses recorded with `RECORD=1` (saved in `public/replay/`) and are labelled *Sample data* in the UI. The Studio, frames, retail audit and planner agent need no keys at all.
+**No keys?** Open the app and pick a sample profile (Lena −6.50, Helen +2.75). When `public/replay/` holds recordings, the sample profiles replay real YouCam responses, labelled as recorded in the UI. To make them, run `RECORD=1 npm run dev`, then `node scripts/record-personas.mjs` (about 35–40 units per profile). The Studio, frames, retail audit and planner agent need no keys at all.
+
+**Spend protection:** YouCam params are built on the server from fixed presets (the browser only says which analysis or look to run). Each IP gets 24 YouCam runs and 30 agent requests per 10 minutes, and a daily unit budget (`YOUCAM_DAILY_UNITS`, default 400) protects a public demo key.
 
 **Deploy:** `vercel.json` serves the Vite build and routes `/api/*` to one serverless function (`api/index.js`). Set `YOUCAM_API_KEY` (and optionally `ANTHROPIC_API_KEY`) as environment variables.
 

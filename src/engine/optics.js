@@ -90,14 +90,16 @@ export function recommendIndex({ rx, contour }) {
     verdict: r === best ? "best" : metric(r.profile) <= target ? "fits" : "too-thick",
   }));
 
-  const pricier = rows.filter((r) => r.index.priceUsd > best.index.priceUsd);
+  const plano = Math.abs(rx.sph) + Math.abs(rx.cyl) < 0.25;
+  const pricier = rows.filter((r) => r.index.priceUsd > best.index.priceUsd && metric(r.profile) < metric(best.profile) - 0.05);
   const next = pricier.length ? pricier.reduce((a, b) => (metric(a.profile) < metric(b.profile) ? a : b)) : null;
   const saved = next ? metric(best.profile) - metric(next.profile) : 0;
   let note;
-  if (metric(best.profile) > target) note = `Even with ${best.index.label} lenses this frame shows ${/^(8|11|18)/.test(metric(best.profile).toFixed(1)) ? "an" : "a"} ${metric(best.profile).toFixed(1)} mm ${minus ? "edge" : "centre"}. Smaller, rounder frames keep a prescription this strong thinnest.`;
+  if (plano) note = "No lens power, so the standard lens is all you need.";
+  else if (metric(best.profile) > target) note = `Even with ${best.index.label} lenses this frame shows ${/^(8|11|18)/.test(metric(best.profile).toFixed(1)) ? "an" : "a"} ${metric(best.profile).toFixed(1)} mm ${minus ? "edge" : "centre"}. Smaller, rounder frames keep a prescription this strong thinnest.`;
   else if (next && saved < 0.5) note = `${next.index.label} would save only ${saved.toFixed(1)} mm for $${next.index.priceUsd - best.index.priceUsd} more. Not worth it.`;
   else if (next) note = `${next.index.label} saves ${saved.toFixed(1)} mm for $${next.index.priceUsd - best.index.priceUsd} more.`;
-  else note = "This is the thinnest lens available.";
+  else note = "No pricier lens makes this one meaningfully thinner.";
 
   return { best: best.index, profile: best.profile, table, note, metric: minus ? "edge" : "centre", target };
 }

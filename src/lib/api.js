@@ -12,7 +12,9 @@ const FRIENDLY = {
   error_lighting_dark: "The photo is too dark. Find brighter, even light.",
   error_no_face: "We couldn't find a face. Look straight at the camera.",
   CreditInsufficiency: "The YouCam account is out of units. Switch to the demo profile.",
-  InvalidApiKey: "The server's YouCam key isn't valid.",
+  InvalidApiKey: "The server's YouCam key isn't valid. Try a sample profile instead.",
+  RateLimited: "Too many requests from this device. Try again in a few minutes, or use a sample profile.",
+  DailyBudget: "Today's live YouCam demo budget is used up. Try a sample profile.",
   NoApiKey: "Live YouCam calls aren't set up on this server. Use the demo profile.",
 };
 
@@ -25,8 +27,9 @@ async function post(url, body) {
 
 export const health = () => fetch("/api/health").then((r) => r.json()).catch(() => ({ youcam: false, llm: null }));
 
-export async function runYouCam(feature, image, params, { label } = {}) {
-  const out = await post("/api/youcam/run", { feature, image, params, label });
+// The server builds the YouCam params from presets; we only send what to run.
+export async function runYouCam(feature, image, extra = {}, { label } = {}) {
+  const out = await post("/api/youcam/run", { feature, image, ...extra, label });
   logCall({ feature, units: out.units, ms: out.ms, source: "live" });
   return out;
 }

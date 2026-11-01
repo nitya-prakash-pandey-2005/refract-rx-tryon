@@ -2,8 +2,9 @@
 import { uploadImage, createTask, pollTask, credit, YouCamError } from "./youcam.js";
 import { unitCost } from "../src/engine/youcam.js";
 import { runAgent, llmProvider } from "./agent.js";
+import { allow, buildParams, budgetLeft, spend } from "./limits.js";
 
-const FEATURES = new Set(["face-attr-analysis", "skin-analysis", "makeup-vto", "skin-tone-analysis"]);
+const FEATURES = new Set(["face-attr-analysis", "skin-analysis", "makeup-vto"]);
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 
 const send = (res, status, body) => {
@@ -44,17 +45,24 @@ async function record(feature, label, params, results) {
   await writeFile(`public/replay/${name}`, JSON.stringify({ feature, params, results, recordedAt: new Date().toISOString() }, null, 2));
 }
 
+const ipOf = (req) => String(req.headers?.["x-forwarded-for"] || "").split(",")[0].trim() || req.socket?.remoteAddress || "local";
+const TOO_MANY = () => new YouCamError("Too many requests from this device. Try again in a few minutes.", "RateLimited", 429);
+
 export async function handle(req, res) {
   const path = (req.url || "").split("?")[0].replace(/\/+$/, "");
-  const body = typeof req.body === "string" ? JSON.parse(req.body || "{}") : req.body || {};
   try {
+    let body;
+    try { body = typeof req.body === "string" ? JSON.parse(req.body || "{}") : req.body || {}; } catch { throw new YouCamError("Invalid JSON body.", "BadJson", 400); }
     if (path === "/api/health") return send(res, 200, { youcam: Boolean(process.env.YOUCAM_API_KEY), llm: llmProvider() });
 
     if (path === "/api/youcam/credit") return send(res, 200, { units: await credit() });
 
     if (path === "/api/youcam/run" && req.method === "POST") {
-      const { feature, image, params = {}, label } = body;
+      const { feature, image, label } = body;
       if (!FEATURES.has(feature)) throw new YouCamError(`Unsupported feature: ${feature}`, "BadFeature", 400);
+      if (!allow(`yc:${ipOf(req)}`, { limit: 24, windowMs: 10 * 60 * 1000 })) throw TOO_MANY();
+      const params = buildParams(feature, body);
+      if (budgetLeft() < unitCost(feature, params)) throw new YouCamError("Today's demo budget for live YouCam calls is used up. Try a sample profile.", "DailyBudget", 429);
       const t0 = Date.now();
       const { buf, mime } = decodeImage(image);
       const fileId = await uploadImage(buf, mime);
@@ -62,11 +70,15 @@ export async function handle(req, res) {
       const data = await pollTask(feature, taskId);
       // Result URLs expire in 2 h and need CORS for canvas use, so inline the try-on image.
       if (feature === "makeup-vto" && data.results?.url) data.results.image = await toDataUrl(data.results.url);
-      await record(feature, label, params, data.results);
+      spend(unitCost(feature, params));
+      await record(feature, process.env.RECORD === "1" ? label : null, params, data.results);
       return send(res, 200, { status: "success", feature, results: data.results, units: unitCost(feature, params), ms: Date.now() - t0, taskId });
     }
 
-    if (path === "/api/agent" && req.method === "POST") return send(res, 200, await runAgent(body));
+    if (path === "/api/agent" && req.method === "POST") {
+      if (!allow(`ag:${ipOf(req)}`, { limit: 30, windowMs: 10 * 60 * 1000 })) throw TOO_MANY();
+      return send(res, 200, await runAgent(body));
+    }
 
     return send(res, 404, { error: "Not found" });
   } catch (e) {

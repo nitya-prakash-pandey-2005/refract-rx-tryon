@@ -46,7 +46,7 @@ export default function Frames() {
         {SHAPES.map((x) => <button key={x.value} className={`chip ${shape === x.value ? "on" : ""}`} onClick={() => setShape(x.value)}>{x.label}</button>)}
       </div>
       <div className="grid g3">
-        {list.map(({ frame, fit }, i) => (
+        {list.map(({ frame, fit }) => (
           <Card key={frame.id} className="interactive frame-card" data-reveal>
             <div className="row between">
               <Hud>#{ranked.findIndex((r) => r.frame.id === frame.id) + 1} for you</Hud>
@@ -62,7 +62,7 @@ export default function Frames() {
             </div>
             <div className="row" style={{ gap: 8 }}>
               <a className="btn primary sm grow" href={`#/studio/${frame.id}`}><Sparkles size={15} />Try on</a>
-              <button className="btn sm ghost" onClick={() => setOpen(frame.id)}>Why #{i + 1}?</button>
+              <button className="btn sm ghost" onClick={() => setOpen(frame.id)}>Why #{ranked.findIndex((r) => r.frame.id === frame.id) + 1}?</button>
             </div>
           </Card>
         ))}

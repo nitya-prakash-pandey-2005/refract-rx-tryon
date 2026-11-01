@@ -4,8 +4,7 @@ import { getStore, setStore } from "../state/store";
 import { runYouCam } from "./api";
 import { loadImage, cropDataUrl } from "../vision/image";
 import { cropForAnalysis } from "../engine/measure";
-import { faceParams, skinParams, makeupParams, normalizeFaceAttr, normalizeSkin, HD_MIN_SHORT_SIDE } from "../engine/youcam";
-import { planLook, genericLook } from "../engine/makeup";
+import { normalizeFaceAttr, normalizeSkin, HD_MIN_SHORT_SIDE } from "../engine/youcam";
 
 export const rxKey = (rx) => JSON.stringify(rx);
 
@@ -18,8 +17,8 @@ export async function analyseFace({ label, onStep } = {}) {
   const hd = Math.min(crop.w, crop.h) >= HD_MIN_SHORT_SIDE;
   onStep?.("analyse");
   const [fa, sk] = await Promise.allSettled([
-    runYouCam("face-attr-analysis", url, faceParams(), { label }),
-    runYouCam("skin-analysis", url, skinParams(hd), { label }),
+    runYouCam("face-attr-analysis", url, {}, { label }),
+    runYouCam("skin-analysis", url, { hd }, { label }),
   ]);
   if (fa.status === "rejected" && sk.status === "rejected") throw fa.reason;
   setStore({
@@ -34,12 +33,10 @@ export async function analyseFace({ label, onStep } = {}) {
 export async function renderLooks({ label, onStep } = {}) {
   const s = getStore();
   if (!s.photo) throw new Error("Scan your face first.");
-  const rxLook = planLook({ rx: s.rx, faceAttr: s.faceAttr || {}, skin: s.skin || {}, skinHex: s.skinHex });
-  const gen = genericLook();
   onStep?.("looks");
   const [a, b] = await Promise.allSettled([
-    runYouCam("makeup-vto", s.photo.src, makeupParams(rxLook.effects), { label: label && `${label}-rx` }),
-    runYouCam("makeup-vto", s.photo.src, makeupParams(gen.effects), { label: label && `${label}-generic` }),
+    runYouCam("makeup-vto", s.photo.src, { look: { kind: "rx", rx: s.rx, faceAttr: s.faceAttr, skin: s.skin, skinHex: s.skinHex } }, { label: label && `${label}-rx` }),
+    runYouCam("makeup-vto", s.photo.src, { look: { kind: "generic" } }, { label: label && `${label}-generic` }),
   ]);
   const looks = { ...getStore().looks };
   if (a.status === "fulfilled") looks.rx = { image: a.value.results.image, rxKey: rxKey(s.rx), at: Date.now() };

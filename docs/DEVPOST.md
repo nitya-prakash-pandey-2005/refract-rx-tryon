@@ -52,7 +52,7 @@ Refract is a web app (installable on phones) that shows what you'll **actually**
 - **Agent:** Anthropic SDK, `claude-opus-5-5`, with a manual tool-use loop over strict JSON-schema tools (`search_frames`, `lens_report`, `plan_eye_look`, `suggest_action`) and server-side fallbacks. A deterministic planner uses the same tools when no key is set.
 - **UI:** React 19 + Vite 6, a dark glass/HUD design system, and anime.js for the lens hero timeline, text splitting, stroke drawing and the Showroom↔Rx morph. Works at 390 px and 1440 px, installable as a PWA.
 - **Judge mode:** two sample profiles that replay real recorded YouCam responses, clearly labelled *Sample data*.
-- **Tests:** 38 `node:test` cases covering optics, fit scoring, PD measurement, frame placement, lens warp, makeup rules, response normalisers and the agent planner.
+- **Tests:** 46 `node:test` cases covering optics, fit scoring, PD measurement, frame placement, lens warp, makeup rules, response normalisers, spend limits and the agent planner.
 
 ## Challenges we ran into
 

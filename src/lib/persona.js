@@ -35,5 +35,5 @@ export async function loadPersona(id) {
     skin: sk ? normalizeSkin(sk.results) : null,
     recordedAt: fa?.recordedAt || null,
   });
-  return p;
+  return { ...p, recorded: Boolean(fa || lr) };
 }

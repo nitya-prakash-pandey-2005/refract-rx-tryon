@@ -68,7 +68,7 @@ export default function App() {
         mobileTabs={MOBILE_TABS}
         topRight={
           <span className="row" style={{ gap: 8 }}>
-            {s.persona && <span className="badge t-violet desktop-only">Sample data</span>}
+            {s.persona && <span className="badge t-violet desktop-only">Sample profile</span>}
             <a className="btn sm ghost" href="#/bag" aria-label="Bag"><ShoppingBag size={16} />{s.bag.length ? <b>{s.bag.length}</b> : null}</a>
           </span>
         }

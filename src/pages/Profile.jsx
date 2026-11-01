@@ -11,6 +11,7 @@ import { HD_MIN_SHORT_SIDE } from "../engine/youcam";
 import { cropForAnalysis } from "../engine/measure";
 import NeedPhoto from "../components/NeedPhoto";
 import CompareSlider from "../components/CompareSlider";
+import DemoPicker from "../components/DemoPicker";
 
 const FEATURE_NAME = { "face-attr-analysis": "Face Analyzer", "skin-analysis": "Skin Analysis", "makeup-vto": "Makeup VTO" };
 const SKIN_ROWS = [
@@ -23,6 +24,7 @@ export default function Profile({ query }) {
   const s = useStore();
   const root = useRef(null);
   const [step, setStep] = useState(null);
+  const [err, setErr] = useState(null);
   useReveal(root, [Boolean(s.photo)]);
   if (!s.photo) return <div className="stack-lg"><PageHead kicker="Your face" title="Your face, measured" /><NeedPhoto to="/profile" /></div>;
 
@@ -37,13 +39,14 @@ export default function Profile({ query }) {
   const fa = s.faceAttr;
 
   async function run(what) {
+    setErr(null);
     try {
       if (what !== "looks") { setStep("analyse"); await analyseFace({ label: query.record }); }
       setStep("looks");
       await renderLooks({ label: query.record });
       toast("YouCam analysis complete.", "ok");
     } catch (e) {
-      toast(e.message || "YouCam call failed.", "warn");
+      setErr({ message: e.message || "YouCam call failed.", code: e.code });
     } finally {
       setStep(null);
     }
@@ -59,7 +62,20 @@ export default function Profile({ query }) {
   return (
     <div className="stack-lg" ref={root}>
       <PageHead kicker="Step 3 of 3" title="Your face, measured" sub="YouCam reads your eye area and face shape; Refract works out what your lenses will change." right={runBtn} />
-      {s.persona && <div className="callout small" data-reveal>Sample profile: these are real YouCam responses recorded earlier, replayed so you can try Refract without a camera.</div>}
+      {s.persona && (s.faceAttr || s.looks.rx) && <div className="callout small" data-reveal>Sample profile: the YouCam results below are real responses recorded earlier and replayed, so you can try Refract without a camera or an API key.</div>}
+      {s.persona && !s.faceAttr && !s.looks.rx && <div className="callout small" data-reveal>Sample profile: measurements come from the sample photo. YouCam results haven't been recorded for it on this server.</div>}
+      {err && (
+        <Card className="alert" data-reveal>
+          <div className="stack-sm">
+            <b>{err.message}</b>
+            {/^error_(src_face|no_face|lighting|face_parsing)/.test(err.code || "") ? (
+              <a className="btn sm" href="#/scan" style={{ width: "max-content" }}>Retake my photo</a>
+            ) : (
+              <><span className="small muted">You can still try everything with a sample profile:</span><DemoPicker compact to="/profile" /></>
+            )}
+          </div>
+        </Card>
+      )}
 
       <div className="grid g-12">
         <Card className="span-5" title="Measurements" icon={ScanFace} right={<Hud>from your photo</Hud>} data-reveal>

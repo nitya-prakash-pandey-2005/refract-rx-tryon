@@ -1,7 +1,7 @@
 // Rx-Fit: how well a frame suits this face *and this prescription*.
 // Score = 95 + 100 × Σ driver contributions, clamped to 0..100. Drivers explain the score.
 import { FRAMES, frameContour } from "./frames.js";
-import { INDICES, recommendIndex, lensProfile, spherEq } from "./optics.js";
+import { INDICES, recommendIndex, lensProfile, spherEq, EDGE_TARGET, CENTRE_TARGET } from "./optics.js";
 
 export const PUPIL_ABOVE_BOX_CENTRE = 2; // mm
 export const ENDPIECE = 4; // mm per side
@@ -46,13 +46,14 @@ export function fitFrame({ frame, rx, pd, faceWidthMm, faceShape }) {
   const drivers = [];
 
   if (!plano) {
-    drivers.push({ feature: "thickness", label: `${minus ? "Edge" : "Centre"} ${r1(thick)} mm at ${lens.best.label.split(" ")[0]}`, contribution: -clamp((thick - 3) * 9, 0, 45) / 100 });
+    drivers.push({ feature: "thickness", label: `${minus ? "Edge" : "Centre"} ${r1(thick)} mm at ${lens.best.label.split(" ")[0]}`, contribution: -clamp((thick - 3) * 9, 0, 90) / 100 });
     if (lens.best.priceUsd) drivers.push({ feature: "cost", label: `Needs ${lens.best.label} (+$${lens.best.priceUsd})`, contribution: -(lens.best.priceUsd / 149) * 0.08 });
     drivers.push({ feature: "decentration", label: `Lens centre moved ${r1(dec)} mm`, contribution: -clamp((dec - 4) * 2, 0, 12) / 100 });
   }
   if (faceWidthMm) {
     const d = totalWidth - faceWidthMm;
-    drivers.push({ feature: "width", label: d > 0 ? `${r1(d)} mm wider than your face` : `${r1(-d)} mm narrower than your face`, contribution: -clamp((Math.abs(d) - 3) * 3, 0, 25) / 100 });
+    const widthWeight = !plano && thick > (minus ? EDGE_TARGET : CENTRE_TARGET) ? 0.5 : 1; // thick lenses dominate the look
+    drivers.push({ feature: "width", label: d > 0 ? `${r1(d)} mm wider than your face` : `${r1(-d)} mm narrower than your face`, contribution: (-clamp((Math.abs(d) - 3) * 3, 0, 25) / 100) * widthWeight });
   }
   if (faceShape) {
     const ok = frame.faceShapes.includes(faceShape.toLowerCase());

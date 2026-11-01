@@ -62,14 +62,17 @@ function StudioInner({ s, frameId }) {
     if (c.width !== s.photo.w) { c.width = s.photo.w; c.height = s.photo.h; }
     drawScene(c.getContext("2d", { willReadFrequently: true }), { source, place, frame, rx: s.rx, t: tRef.current, lens: { od: lens.od, os: lens.os, minus: fit.minus } });
   };
+  const renderRef = useRef(render);
+  renderRef.current = render; // the morph always draws with the latest frame, index and look
   useEffect(render, [source, place, lens]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => () => anim.current?.pause?.(), []);
 
   // Showroom (t=0, lensless) ↔ Your Rx (t=1). Plays once on arrival.
   useEffect(() => {
     if (!source) return;
     anim.current?.pause?.();
     const to = mode === "rx" ? 1 : 0;
-    const go = () => { anim.current = tween(tRef.current, to, (v) => { tRef.current = v; setT(v); render(); }, { duration: 1500 }); };
+    const go = () => { anim.current = tween(tRef.current, to, (v) => { tRef.current = v; setT(v); renderRef.current(); }, { duration: 1500 }); };
     const id = setTimeout(go, tRef.current === 0 && to === 1 ? 500 : 0);
     return () => clearTimeout(id);
   }, [mode, source, place]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -111,7 +114,7 @@ function StudioInner({ s, frameId }) {
               <canvas ref={canvas} style={{ width: `${(s.photo.w / crop.w) * 100}%`, left: `${(-crop.x / crop.w) * 100}%`, top: `${(-crop.y / crop.h) * 100}%` }} />
               <div className="stage-hud">
                 <span className="mode-pill">{t < 0.5 ? "Showroom · no lenses" : `Your Rx · ${fmtD(s.rx.od.sph)} / ${fmtD(s.rx.os.sph)}`}</span>
-                <span className="mode-pill mono">eyes {(eyeChange * t >= 0 ? "+" : "") + (eyeChange * t).toFixed(1)}%</span>
+                <span className="mode-pill mono">{Math.abs(eyeChange) < 1 ? "no visible lens effect" : `eyes ${(eyeChange * t >= 0 ? "+" : "") + (eyeChange * t).toFixed(1)}%`}</span>
               </div>
             </div>
             <div className="stage-controls">

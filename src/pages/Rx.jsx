@@ -1,4 +1,5 @@
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { parseDiopter, RANGES } from "../engine/rxinput";
 import { ArrowRight, Eye, Info } from "lucide-react";
 import { Card, PageHead, Hud, Badge } from "../ui";
 import { useStore, setStore } from "../state/store";
@@ -15,15 +16,32 @@ const PRESETS = [
 ];
 const fmt = (v) => (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v).toFixed(2);
 
+const fmtPower = (v) => (v > 0 ? "+" : "") + v.toFixed(2);
+
+// Text field that lets people type "-", "−6,5" etc.; commits only valid, clamped numbers.
+function NumField({ label, value, range, integer, onCommit, aria }) {
+  const show = (v) => (integer ? String(Math.round(v)) : fmtPower(v));
+  const [text, setText] = useState(show(value));
+  useEffect(() => { setText((prev) => (parseDiopter(prev, range) === value ? prev : show(value))); }, [value]); // eslint-disable-line react-hooks/exhaustive-deps
+  return (
+    <label className="field">
+      <span>{label}</span>
+      <input className="input mono" type="text" inputMode="decimal" value={text} aria-label={aria}
+        onChange={(e) => { setText(e.target.value); const v = parseDiopter(e.target.value, range); if (v != null) onCommit(integer ? Math.round(v) : v); }}
+        onBlur={() => setText(show(value))} />
+    </label>
+  );
+}
+
 function EyeFields({ eye, label, value, onChange }) {
-  const set = (k, v) => onChange({ ...value, [k]: Number.isFinite(v) ? v : 0 });
+  const set = (k) => (v) => onChange({ ...value, [k]: v });
   return (
     <div className="rx-eye">
       <Hud>{label}</Hud>
       <div className="rx-fields">
-        <label className="field"><span>SPH</span><input className="input mono" type="number" step="0.25" min="-16" max="10" value={value.sph} onChange={(e) => set("sph", parseFloat(e.target.value))} aria-label={`${eye} sphere`} /></label>
-        <label className="field"><span>CYL</span><input className="input mono" type="number" step="0.25" min="-6" max="0" value={value.cyl} onChange={(e) => set("cyl", parseFloat(e.target.value))} aria-label={`${eye} cylinder`} /></label>
-        <label className="field"><span>AXIS</span><input className="input mono" type="number" step="1" min="0" max="180" value={value.axis} onChange={(e) => set("axis", Math.max(0, Math.min(180, parseInt(e.target.value, 10))))} aria-label={`${eye} axis`} /></label>
+        <NumField label="SPH" value={value.sph} range={RANGES.sph} onCommit={set("sph")} aria={`${eye} sphere`} />
+        <NumField label="CYL" value={value.cyl} range={RANGES.cyl} onCommit={set("cyl")} aria={`${eye} cylinder`} />
+        <NumField label="AXIS" value={value.axis} range={RANGES.axis} integer onCommit={set("axis")} aria={`${eye} axis`} />
       </div>
     </div>
   );

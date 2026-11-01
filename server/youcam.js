@@ -46,7 +46,8 @@ export async function createTask(feature, body) {
 }
 
 // Never re-create a task because polling ran out: that would charge units twice.
-export async function pollTask(feature, taskId, { intervalMs = 3000, timeoutMs = 120000 } = {}) {
+export const POLL_TIMEOUT_MS = 100000; // stays under the 120 s serverless limit
+export async function pollTask(feature, taskId, { intervalMs = 3000, timeoutMs = POLL_TIMEOUT_MS } = {}) {
   const v = VERSION[feature] || "v2.0";
   const t0 = Date.now();
   await sleep(1500);

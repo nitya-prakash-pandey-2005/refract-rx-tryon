@@ -155,7 +155,7 @@ async function runClaude(messages, ctx) {
   for (let step = 0; step < MAX_STEPS; step++) {
     const res = await client.beta.messages.create({
       model: MODEL,
-      max_tokens: 16000,
+      max_tokens: 4000,
       betas: ["server-side-fallback-2026-07-01"],
       fallbacks: "default",
       output_config: { effort: "medium" },
@@ -226,7 +226,7 @@ function runPlanner(messages, ctx) {
 
 export async function runAgent({ messages = [], profile } = {}) {
   const ctx = ctxFrom(profile);
-  const clean = messages.filter((m) => (m.role === "user" || m.role === "assistant") && typeof m.content === "string" && m.content.trim()).slice(-12);
+  const clean = (Array.isArray(messages) ? messages : []).filter((m) => (m.role === "user" || m.role === "assistant") && typeof m.content === "string" && m.content.trim()).slice(-12).map((m) => ({ role: m.role, content: m.content.slice(0, 2000) }));
   if (!clean.length || clean[clean.length - 1].role !== "user") return { reply: "Ask me about a frame, your lenses or your eye makeup.", trace: [], actions: [], provider: null };
   if (llmProvider()) {
     try { return await runClaude(clean, ctx); } catch (e) { console.error("Claude agent failed, using planner:", e.message); }

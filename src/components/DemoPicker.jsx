@@ -10,7 +10,7 @@ export default function DemoPicker({ to = "/studio", compact = false }) {
     setBusy(id);
     try {
       const p = await loadPersona(id);
-      toast(`Loaded ${p.name}'s sample profile (recorded YouCam data).`, "ok");
+      toast(p.recorded ? `Loaded ${p.name}'s sample profile with recorded YouCam results.` : `Loaded ${p.name}'s sample profile.`, "ok");
       navigate(to);
     } catch (e) {
       toast(e.message || "Couldn't load the sample profile.", "warn");
