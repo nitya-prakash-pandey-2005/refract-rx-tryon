@@ -22,9 +22,9 @@ export const FRAMES = [
   { id: "vela", name: "Vela", shape: "geo", A: 50, B: 43, DBL: 20, temple: 140, rim: 1.3, material: "metal",
     colorway: { name: "Satin silver", rim: "#aeb3bf", accent: "#e3e6ee" }, priceUsd: 92, faceShapes: ["round", "oval", "square"] },
   { id: "ines", name: "Ines", shape: "butterfly", A: 57, B: 50, DBL: 16, temple: 145, rim: 4.8, material: "acetate",
-    colorway: { name: "Rose crystal", rim: "rgba(232,150,170,0.55)", accent: "#f2b8c6", pattern: "crystal" }, priceUsd: 115, faceShapes: ["heart", "diamond", "oval", "triangle"] },
+    colorway: { name: "Rose crystal", rim: "rgba(232,150,170,0.42)", accent: "rgba(255,214,226,0.75)", pattern: "crystal" }, priceUsd: 115, faceShapes: ["heart", "diamond", "oval", "triangle"] },
   { id: "pico", name: "Pico", shape: "panto", A: 45, B: 39, DBL: 22, temple: 140, rim: 3.8, material: "crystal",
-    colorway: { name: "Clear crystal", rim: "rgba(225,232,240,0.5)", accent: "#ffffff", pattern: "crystal" }, priceUsd: 79, faceShapes: ["oblong", "square", "heart", "oval"] },
+    colorway: { name: "Clear crystal", rim: "rgba(214,226,240,0.28)", accent: "rgba(255,255,255,0.62)", pattern: "crystal" }, priceUsd: 79, faceShapes: ["oblong", "square", "heart", "oval"] },
   { id: "lumen", name: "Lumen", shape: "oval", A: 50, B: 36, DBL: 19, temple: 140, rim: 1.0, material: "metal",
     colorway: { name: "Titanium", rim: "#8d8f96", accent: "#d6d8de" }, priceUsd: 129, faceShapes: ["square", "diamond", "oval", "invtriangle"] },
 ];

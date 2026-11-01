@@ -94,7 +94,7 @@ export function recommendIndex({ rx, contour }) {
   const next = pricier.length ? pricier.reduce((a, b) => (metric(a.profile) < metric(b.profile) ? a : b)) : null;
   const saved = next ? metric(best.profile) - metric(next.profile) : 0;
   let note;
-  if (metric(best.profile) > target) note = `Even ${best.index.label} can't keep this frame under ${target} mm. A smaller frame will look better.`;
+  if (metric(best.profile) > target) note = `Even with ${best.index.label} lenses this frame shows a ${metric(best.profile).toFixed(1)} mm ${minus ? "edge" : "centre"}. Smaller, rounder frames keep a prescription this strong thinnest.`;
   else if (next && saved < 0.5) note = `${next.index.label} would save only ${saved.toFixed(1)} mm for $${next.index.priceUsd - best.index.priceUsd} more. Not worth it.`;
   else if (next) note = `${next.index.label} saves ${saved.toFixed(1)} mm for $${next.index.priceUsd - best.index.priceUsd} more.`;
   else note = "This is the thinnest lens available.";

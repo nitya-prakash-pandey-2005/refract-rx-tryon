@@ -23,6 +23,7 @@
     "@vitejs/plugin-react": "^4.5.0",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "puppeteer-core": "^23.11.1",
     "vite": "^6.3.5"
   },
   "overrides": {
