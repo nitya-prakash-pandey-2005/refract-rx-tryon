@@ -1,0 +1,2 @@
+/* Refract-specific styles on top of the UI kit. Colours come from tokens only. */
+@media (max-width: 900px) { .desktop-only { display: none !important; } }

@@ -20,11 +20,27 @@ function decodeImage(dataUrl) {
   return { buf, mime: m[1] };
 }
 
+async function toDataUrl(url) {
+  const r = await fetch(url);
+  if (!r.ok) throw new YouCamError("Could not download the try-on result.", "ResultDownload", 502);
+  const type = r.headers.get("content-type") || "image/jpeg";
+  return `data:${type};base64,${Buffer.from(await r.arrayBuffer()).toString("base64")}`;
+}
+
 async function record(feature, label, params, results) {
   if (process.env.RECORD !== "1") return;
   const { writeFile, mkdir } = await import("node:fs/promises");
-  await mkdir("public/replay", { recursive: true });
+  await mkdir("public/replay/img", { recursive: true });
   const name = `${label || feature}-${feature}.json`.replace(/[^a-z0-9.\-]/gi, "_");
+  // Save mask overlays locally: YouCam result URLs expire after 2 hours.
+  for (const [i, o] of (results?.output || []).entries()) {
+    if (!o.mask_urls?.[0]) continue;
+    const r = await fetch(o.mask_urls[0]);
+    if (!r.ok) continue;
+    const file = `img/${label || feature}-${o.type}-${o.region || "whole"}-${i}.jpg`.replace(/[^a-z0-9.\-/]/gi, "_");
+    await writeFile(`public/replay/${file}`, Buffer.from(await r.arrayBuffer()));
+    o.mask_urls = [`/replay/${file}`];
+  }
   await writeFile(`public/replay/${name}`, JSON.stringify({ feature, params, results, recordedAt: new Date().toISOString() }, null, 2));
 }
 
@@ -44,6 +60,8 @@ export async function handle(req, res) {
       const fileId = await uploadImage(buf, mime);
       const taskId = await createTask(feature, { ...params, src_file_id: fileId });
       const data = await pollTask(feature, taskId);
+      // Result URLs expire in 2 h and need CORS for canvas use, so inline the try-on image.
+      if (feature === "makeup-vto" && data.results?.url) data.results.image = await toDataUrl(data.results.url);
       await record(feature, label, params, data.results);
       return send(res, 200, { status: "success", feature, results: data.results, units: unitCost(feature, params), ms: Date.now() - t0, taskId });
     }

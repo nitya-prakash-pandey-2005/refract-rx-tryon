@@ -1,11 +1,9 @@
 {
-  "name": "My App",
-  "short_name": "App",
-  "description": "Replace with your app's description.",
-  "start_url": "/#/app",
-  "scope": "/",
+  "name": "Refract — prescription-true try-on",
+  "short_name": "Refract",
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#05060f",
   "theme_color": "#05060f",
-  "icons": [{ "src": "/icons/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+  "icons": [{ "src": "/icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
 }
