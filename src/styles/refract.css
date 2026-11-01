@@ -79,3 +79,11 @@
 .index-chip b { font-family: var(--font-display); font-size: 14px; }
 .index-chip.on { background: var(--grad-soft); border-color: var(--pink); }
 .index-chip .best { position: absolute; top: -8px; font-style: normal; font-size: 9.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: 2px 6px; border-radius: 999px; background: var(--green); color: #04121a; }
+
+/* ---------- frames ---------- */
+.frame-card { display: grid; gap: 10px; }
+.frame-art { padding: 14px 6px; border-radius: 14px; background: radial-gradient(circle at 50% 40%, var(--surface-2), transparent 70%); }
+.frame-facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.frame-facts span { display: grid; gap: 1px; padding: 8px; border-radius: 10px; background: var(--surface); border: 1px solid var(--line); text-align: center; }
+.frame-facts b { font-family: var(--font-display); font-size: 14px; }
+.frame-facts i { font-style: normal; font-size: 11px; color: var(--muted); }
