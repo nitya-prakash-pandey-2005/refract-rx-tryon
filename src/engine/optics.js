@@ -58,9 +58,10 @@ export function lensProfile({ rx, contour, n }) {
 
   const xs = contour.map((p) => p[0]), ys = contour.map((p) => p[1]);
   let volume = 0;
-  for (let x = Math.floor(Math.min(...xs)) + 0.5; x < Math.max(...xs); x += 1)
-    for (let y = Math.floor(Math.min(...ys)) + 0.5; y < Math.max(...ys); y += 1)
-      if (insidePolygon(x, y, contour)) volume += centre - signedSag(x, y, rx, ix.n);
+  const step = 2; // mm grid; each cell is step² mm²
+  for (let x = Math.floor(Math.min(...xs)) + step / 2; x < Math.max(...xs); x += step)
+    for (let y = Math.floor(Math.min(...ys)) + step / 2; y < Math.max(...ys); y += step)
+      if (insidePolygon(x, y, contour)) volume += (centre - signedSag(x, y, rx, ix.n)) * step * step;
 
   return {
     index: ix,
