@@ -49,7 +49,7 @@ export function insidePolygon(x, y, poly) {
   return inside;
 }
 
-export function lensProfile({ rx, contour, n }) {
+export function lensProfile({ rx, contour, n, weight = true }) {
   const ix = asIndex(n);
   const sags = contour.map(([x, y]) => signedSag(x, y, rx, ix.n));
   const centre = Math.max(ix.minCenter, MIN_EDGE + Math.max(...sags));
@@ -58,7 +58,7 @@ export function lensProfile({ rx, contour, n }) {
 
   const xs = contour.map((p) => p[0]), ys = contour.map((p) => p[1]);
   let volume = 0;
-  const step = 2; // mm grid; each cell is step² mm²
+  const step = weight ? 2 : Infinity; // mm grid; each cell is step² mm²
   for (let x = Math.floor(Math.min(...xs)) + step / 2; x < Math.max(...xs); x += step)
     for (let y = Math.floor(Math.min(...ys)) + step / 2; y < Math.max(...ys); y += step)
       if (insidePolygon(x, y, contour)) volume += (centre - signedSag(x, y, rx, ix.n)) * step * step;

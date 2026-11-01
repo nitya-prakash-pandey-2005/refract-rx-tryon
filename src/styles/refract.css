@@ -120,3 +120,27 @@
 .c-bad { background: var(--rose-a); color: var(--rose); }
 i.lg { display: inline-block; width: 12px; height: 12px; border-radius: 4px; vertical-align: -2px; margin-right: 4px; }
 .feed-preview { max-height: 220px; overflow: auto; margin: 10px 0; font-size: 11.5px; }
+
+/* ---------- home ---------- */
+.hero { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr); gap: 28px; align-items: center; padding: 18px 0 6px; }
+@media (max-width: 1000px) { .hero { grid-template-columns: minmax(0, 1fr); } }
+.hero-copy { display: grid; gap: 18px; }
+.hero h1 { font-family: var(--font-display); font-size: clamp(32px, 4.6vw, 58px); line-height: 1.04; letter-spacing: -0.035em; margin: 0; }
+.hero .lead { font-size: 16.5px; color: var(--text-2); max-width: 620px; line-height: 1.55; }
+.hero .lead b { color: var(--text); }
+.hero-lens { margin: 0; display: grid; gap: 8px; justify-items: center; }
+.hero-lens svg { width: 100%; max-width: 440px; filter: drop-shadow(0 20px 50px rgba(0, 0, 0, 0.5)); }
+.hero-lens figcaption { display: grid; justify-items: center; gap: 2px; min-height: 44px; text-align: center; }
+.hero-lens figcaption b { font-family: var(--font-display); font-size: 18px; }
+.hero-lens figcaption span { color: var(--cyan); }
+.steps { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 900px) { .steps { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 480px) { .steps { grid-template-columns: minmax(0, 1fr); } }
+.step { display: grid; gap: 8px; align-content: start; }
+.step-ic { width: 36px; height: 36px; border-radius: 11px; display: grid; place-items: center; background: var(--grad-soft); border: 1px solid var(--line); flex: none; color: var(--text); }
+.wrap-s { white-space: normal !important; }
+
+/* big numbers */
+.display { font-size: 44px; font-weight: 700; letter-spacing: -0.03em; line-height: 1.05; background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.display small { -webkit-text-fill-color: var(--muted); }
+.page-head > .badge, .page-head > .chip { align-self: flex-start; width: max-content; }

@@ -17,7 +17,7 @@ function audit(n) {
   return FRAMES.map((frame) => {
     const cells = RX.map((d) => {
       const rx = { od: { sph: d, cyl: 0, axis: 0 }, os: { sph: d, cyl: 0, axis: 0 } };
-      const p = lensPair({ frame, rx, pd: PD, index });
+      const p = lensPair({ frame, rx, pd: PD, index, weight: false });
       return d <= 0 ? Math.max(p.od.maxEdge, p.os.maxEdge) : Math.max(p.od.centre, p.os.centre);
     });
     const okMinus = RX.filter((d, i) => d <= 0 && cells[i] <= EDGE_TARGET);
