@@ -213,7 +213,7 @@ function runPlanner(messages, ctx) {
     return { reply: rep.index_note.startsWith("Even") ? reply : `${reply} ${rep.index_note}`, trace, actions, provider: "planner" };
   }
 
-  const pool = call("search_frames", { shapes: [...new Set(wantShapes)], max_lens_width_mm: 0, max_price_usd: price });
+  const pool = wantShapes.length || price ? call("search_frames", { shapes: [...new Set(wantShapes)], max_lens_width_mm: 0, max_price_usd: price }) : all;
   const pick = pool[0] || all[0];
   const biggest = [...all].sort((a, b) => b.lens_width_mm - a.lens_width_mm)[0];
   call("suggest_action", { type: "open_studio", frame_id: pick.id, index: 0 });
