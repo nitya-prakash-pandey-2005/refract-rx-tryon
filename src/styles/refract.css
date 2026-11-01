@@ -1,2 +1,26 @@
 /* Refract-specific styles on top of the UI kit. Colours come from tokens only. */
 @media (max-width: 900px) { .desktop-only { display: none !important; } }
+.spin { animation: rf-spin 0.9s linear infinite; }
+@keyframes rf-spin { to { transform: rotate(360deg); } }
+[data-reveal] { opacity: 0; }
+@media (prefers-reduced-motion: reduce) { [data-reveal] { opacity: 1; } }
+
+/* ---------- scan ---------- */
+.scan-stage { position: relative; aspect-ratio: 16 / 10; background: radial-gradient(circle at 50% 40%, var(--surface-raised), var(--bg)); border-radius: var(--r-lg) var(--r-lg) 0 0; overflow: hidden; }
+.scan-stage video, .scan-stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+.scan-stage video { opacity: 0; }
+.scan-stage.live video { opacity: 1; }
+.scan-idle { position: absolute; inset: 0; display: grid; place-items: center; align-content: center; gap: 14px; padding: 24px; text-align: center; color: var(--text-2); }
+.scan-idle p { max-width: 360px; font-size: 13.5px; color: var(--muted); }
+.scan-hud { position: absolute; left: 14px; right: 14px; top: 14px; display: flex; justify-content: space-between; align-items: center; pointer-events: none; }
+.hold-ring { width: 44px; height: 44px; transform: rotate(-90deg); }
+.hold-ring circle { fill: none; stroke-width: 4; }
+.hold-ring circle:first-child { stroke: rgba(255, 255, 255, 0.15); }
+.hold-ring circle:last-child { stroke: var(--green); stroke-dasharray: 119.4; transition: stroke-dashoffset 0.12s linear; }
+
+/* ---------- personas ---------- */
+.persona-card { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: var(--r); background: var(--surface-2); border: 1px solid var(--line); text-align: left; width: 100%; transition: border-color .15s, background .15s; }
+.persona-card:hover { border-color: var(--line-2); background: var(--surface); }
+.persona-card img { width: 46px; height: 46px; border-radius: 12px; object-fit: cover; background: var(--surface-raised); flex: none; }
+.persona-card b { display: block; font-size: 14px; }
+.persona-card .small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
