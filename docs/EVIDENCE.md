@@ -87,3 +87,46 @@ Refract therefore measures nose width and face width from the photo, takes skin 
 | Depth | Face Mesh z | "not metrically accurate" (synthetic supervision) | Kartynnik et al., arXiv:1907.06724 |
 
 The slip score is a physics-based **heuristic**, not a validated predictor. Validating it against a pilot store's return data is the next step.
+
+## Lens upgrades: what "ultra-thin" buys
+
+**What it costs:** retailers price the 1.74 upgrade well above a 1.60/1.61 lens:
+- Miller & Marc lists **+€120 for 1.74 above ±6** ([price list](https://www.millerandmarc.com/en/pages/price-miller-and-marc)).
+- A Singapore optical listing prices a 1.61 lens at **S$45 and a 1.74 at S$95** ([listing](https://www.carousell.sg/p/new-arrivals-of-the-season-oakley-ox8171-size-57-18-138-total-width-140-frame-height-1438017187/)).
+
+The home page says "often €50–120 extra".
+
+**What it buys** (Refract's lens engine; Rx sph / −0.50 × 180, accurate PD; max edge in mm):
+
+| Sphere | Tate 52□19 metal, 1.60 | Tate, 1.74 | Juno 56□18 acetate, 1.74 | Sharpness lost at a 10 mm glance (1.60 vs 1.74) |
+|---|---|---|---|---|
+| −3 | 4.3 | 3.8 | 4.6 | −0.43 vs −0.55 chart lines |
+| −4 | 5.2 | 4.5 | 5.6 | −0.55 vs −0.71 |
+| −6 | 7.1 | 6.0 | 7.6 | −0.80 vs −1.02 |
+
+In the same frame, 1.74 saves 0.5–1.1 mm. A medium frame with 1.60 is thinner than a large frame with 1.74 at every power shown, and sharper.
+
+**Home story, scene 5:** at −6, oiliness 45 and a medium bridge:
+- a 56□18 square acetate frame with 1.74 lenses and a selfie PD (±2.7 mm) scores **87**;
+- a 48□20 titanium oval with 1.60 lenses and a card-measured PD (±0.5 mm) scores **22**.
+
+## Any frame by its printed size
+
+Frames carry "lens width □ bridge temple" on the arm (boxing system, mm). The lens height (B) is rarely printed. Refract estimates it from the shape, using ratios taken from the catalogue frames, unless the listing gives it:
+
+| Shape | B / A |
+|---|---|
+| round | 0.90 |
+| oval | 0.72 |
+| rect | 0.68 |
+| square | 0.85 |
+| browline | 0.78 |
+| panto | 0.86 |
+| cat-eye | 0.79 |
+| butterfly | 0.88 |
+| aviator | 0.86 |
+| geometric | 0.86 |
+
+**Frame weight** is estimated per mm of lens width: metal 0.29 g, titanium 0.20 g, acetate 0.49 g (catalogue fit). Metal and titanium frames get adjustable pads; acetate gets a fixed bridge.
+
+**The bookmarklet** reads the size from the selected text, or else from the first size on the page. It reads shape and material from the selection, the page title and the `<h1>`. When no size is found, the app says so instead of guessing.
