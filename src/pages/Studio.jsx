@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Sparkles, ShoppingBag, MessageCircle, ScanEye, Weight, Ruler, Eye } from "lucide-react";
-import { Card, PageHead, Hud, Badge, Seg, Drivers, Toggle, toast } from "../ui";
+import { Sparkles, ShoppingBag, MessageCircle, ScanEye, Weight, Ruler, Eye, Share2, Download } from "lucide-react";
+import { Card, PageHead, Hud, Badge, Seg, Drivers, Toggle, Sheet, toast } from "../ui";
 import { useStore, setStore } from "../state/store";
 import { navigate } from "../lib/router";
 import { tween } from "../lib/anim";
@@ -16,6 +16,7 @@ import FrameArt from "../components/FrameArt";
 import LensSection from "../components/LensSection";
 import { rxKey } from "../lib/pipeline";
 import { sendToStore } from "../lib/embed";
+import { renderCard } from "../vision/card";
 
 const fmtD = (v) => (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v).toFixed(2);
 const usd = (v) => `$${v.toFixed(0)}`;
@@ -34,6 +35,7 @@ function StudioInner({ s, frameId }) {
   const [mode, setMode] = useState("rx");
   const [zoom, setZoom] = useState("face");
   const [xray, setXray] = useState(false);
+  const [card, setCard] = useState(null);
   const [t, setT] = useState(0);
   const pd = { left: s.measure.pd.left, right: s.measure.pd.right };
   const ranked = useMemo(
@@ -105,6 +107,16 @@ function StudioInner({ s, frameId }) {
     setStore((st) => ({ bag: [...st.bag.filter((b) => b.kind !== "frame"), { kind: "frame", id: frame.id, name: `${frame.name} · ${frame.colorway.name}`, priceUsd: frame.priceUsd, lens: { n: index.n, label: index.label, priceUsd: index.priceUsd, maxEdge, weightG: weight }, rx: st.rx, pd: st.measure.pd }] }));
     const sent = sendToStore({ id: frame.id, name: frame.name, priceUsd: frame.priceUsd, lens: { n: index.n, label: index.label, priceUsd: index.priceUsd, maxEdge, weightG: weight } });
     toast(sent ? `${frame.name} with ${index.label} lenses sent to the store cart.` : `${frame.name} with ${index.label} lenses added to your bag.`, "ok");
+  };
+  const makeCard = async () => {
+    const blob = await renderCard({
+      source: canvas.current, crop,
+      title: `${frame.name} · ${fmtD(s.rx.od.sph)} / ${fmtD(s.rx.os.sph)}`,
+      subtitle: `${frame.colorway.name} with ${index.label} lenses${looks[look] && look === "rx" ? " · Rx-tuned eye look" : ""}`,
+      stats: [["Eyes to others", `${eyeChange >= 0 ? "+" : ""}${eyeChange.toFixed(1)}%`], [fit.minus ? "Thickest edge" : "Centre", `${(fit.minus ? maxEdge : centre).toFixed(1)} mm`], ["Both lenses", `${weight.toFixed(1)} g`], ["Rx-Fit", `${fit.score}`]],
+    });
+    if (card) URL.revokeObjectURL(card);
+    setCard(URL.createObjectURL(blob));
   };
   const addLook = () => {
     setStore((st) => ({ bag: [...st.bag.filter((b) => b.kind !== "makeup"), ...rxLook.products.map((p) => ({ kind: "makeup", ...p }))] }));
@@ -179,11 +191,21 @@ function StudioInner({ s, frameId }) {
               <button className="btn primary block" onClick={addToBag}><ShoppingBag size={17} />Add frame + lenses</button>
               {looks.rx && <button className="btn block" onClick={addLook}><Sparkles size={17} />Add the {rxLook.name} look</button>}
               {!looks.rx && <a className="btn block" href="#/profile"><Sparkles size={17} />Render my Rx-tuned look</a>}
+              <button className="btn block" onClick={makeCard}><Share2 size={17} />Share my Refract card</button>
               <a className="btn ghost block" href={`#/agent?frame=${frame.id}`}><MessageCircle size={17} />Ask Refract about this frame</a>
             </div>
           </Card>
         </div>
       </div>
+      <Sheet open={!!card} onClose={() => setCard(null)} title="Your Refract card">
+        {card && (
+          <div className="stack">
+            <img src={card} alt="Refract card preview" className="card-preview" />
+            <a className="btn primary block" href={card} download={`refract-${frame.id}.png`}><Download size={16} />Download PNG</a>
+            <p className="tiny muted">1080 × 1350, ready for Instagram or WhatsApp. Made on your device.</p>
+          </div>
+        )}
+      </Sheet>
     </div>
   );
 }
