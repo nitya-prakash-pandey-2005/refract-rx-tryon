@@ -60,3 +60,28 @@ test("POST /api/v1/risk scores any frame by its printed size", async () => {
   const bad = await call({ rx, frame: { size: "nope" } });
   assert.equal(bad.status, 400);
 });
+
+test("a typed frame inherits face-shape fit from catalogue frames of the same shape", async () => {
+  const { rankFrames } = await import("../src/engine/fit.js");
+  const { FRAMES } = await import("../src/engine/frames.js");
+  const mine = customFrame({ A: 50, DBL: 19, shape: "oval", material: "titanium" });
+  assert.ok(mine.faceShapes.includes("oval"));
+  const ranked = rankFrames({ rx, pd, faceWidthMm: 132, faceShape: "Oval" }, [mine, ...FRAMES]);
+  const score = (id) => ranked.find((r) => r.frame.id === id).fit.score;
+  assert.ok(Math.abs(score("custom") - score("lumen")) <= 1, `custom ${score("custom")} vs lumen ${score("lumen")}`);
+});
+
+test("the API normalises common shape and material names and rejects unknown ones", async () => {
+  const ok = await call({ rx, frame: { size: "53-17-145", shape: "Cat-Eye", material: "Plastic" } });
+  assert.equal(ok.status, 200);
+  assert.deepEqual([ok.json.frame.shape, ok.json.frame.material], ["cat", "acetate"]);
+  const rect = await call({ rx, frame: { size: "52-18", shape: "rectangle", material: "Metal" } });
+  assert.deepEqual([rect.json.frame.shape, rect.json.frame.material], ["rect", "metal"]);
+  for (const bad of [{ material: "toString" }, { material: "__proto__" }, { shape: "blob" }]) {
+    const r = await call({ rx, frame: { size: "52-18", ...bad } });
+    assert.equal(r.status, 400, JSON.stringify(bad));
+  }
+  const str = await call({ rx, frame: "52-18-140" });
+  assert.equal(str.status, 200);
+  assert.equal(str.json.frameId, "custom");
+});

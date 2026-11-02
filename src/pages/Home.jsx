@@ -30,7 +30,7 @@ const ROWS = [
 const TRUST = [
   { icon: Lock, t: "Private by design", b: "Face tracking runs on your device and the camera feed never leaves it. A photo goes to YouCam only when you press \"Run analysis\"." },
   { icon: FlaskConical, t: "Built on published science", b: "Standard lens optics, Prentice's rule, measured colour-fringe perception (Winter et al. 2015), ANSI Z80.1 tolerances and skin-friction data.", href: `${REPO}/blob/main/docs/EVIDENCE.md`, cta: "Read the evidence" },
-  { icon: Github, t: "Open and tested", b: "The whole engine is open source with 88 automated tests. Every number in the app shows how it was worked out.", href: REPO, cta: "See the code" },
+  { icon: Github, t: "Open and tested", b: "The whole engine is open source with 97 automated tests. Every number in the app shows how it was worked out.", href: REPO, cta: "See the code" },
   { icon: Scale, t: "Honest about limits", b: "A shopping aid, not a medical device. It can't test your eyes; it helps you pick frames and lenses for the prescription you have." },
 ];
 const WHO = [

@@ -64,6 +64,7 @@ export default function QuickCheck() {
   useEffect(() => {
     const d = createDraggable(knob.current, {
       container: track.current, y: false, cursor: { onHover: "grab", onGrab: "grabbing" },
+      velocityMultiplier: 0, // no throw: the prescription stays where the finger lifts
       onDrag: (self) => setPower(snap(MIN + self.progressX * (MAX - MIN))),
       onUpdate: (self) => setPower(snap(MIN + self.progressX * (MAX - MIN))),
     });

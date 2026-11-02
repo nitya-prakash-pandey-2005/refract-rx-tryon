@@ -38,3 +38,20 @@ test("the bookmarklet is a single javascript: URL", () => {
   assert.ok(b.startsWith("javascript:"));
   assert.ok(!/\s/.test(b), "no raw whitespace");
 });
+
+test("prefers a labelled size over prices and return windows elsewhere on the page", () => {
+  const q = run({ title: "Ellis Glasses", body: "Free shipping on orders over $50 | 14-day returns\nEllis\nLens width 52 mm / Bridge 20 mm / Temple 145 mm" });
+  assert.equal(q.size, "52-20-145");
+});
+
+test("reads labelled sizes, unusual hyphens and box separators", () => {
+  assert.equal(run({ selection: "Lens width: 52 mm · Bridge: 18 mm · Temple: 145 mm" }).size, "52-18-145");
+  assert.equal(run({ selection: "Size 52‑18‑140" }).size, "52-18-140");
+  assert.equal(run({ selection: "52□18□145" }).size, "52-18-145");
+});
+
+test("colour names and words inside words don't decide material or shape", () => {
+  const q = run({ title: "Background story: Tortoise Gold Acetate", body: "Size 51-20-145" });
+  assert.equal(q.material, "acetate");
+  assert.equal(q.shape, "rect");
+});

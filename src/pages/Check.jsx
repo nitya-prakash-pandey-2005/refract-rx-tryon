@@ -5,7 +5,7 @@ import { bookmarklet } from "../lib/bookmarklet";
 import { useStore, setStore } from "../state/store";
 import { navigate } from "../lib/router";
 import { countUp, useReveal } from "../lib/anim";
-import { FRAMES, SHAPES, getFrame, parseFrameSize, customFrame } from "../engine/frames";
+import { FRAMES, SHAPES, getFrame, parseFrameSize, customFrame, normShape, normMaterial } from "../engine/frames";
 import { lensPair } from "../engine/fit";
 import { INDICES } from "../engine/optics";
 import { remakeRisk } from "../engine/risk";
@@ -27,10 +27,13 @@ export default function Check({ parts, query = {} }) {
   const root = useRef(null), scoreEl = useRef(null), strip = useRef(null);
   // A shared link or the bookmarklet: #/check/custom?size=52-18-140&shape=rect&material=metal&from=site
   const linked = parts[1] === "custom" && query.size != null ? parseFrameSize(query.size) : null;
+  // The bookmarklet found no size: show only the form, never a frame from an earlier visit.
+  const failed = parts[1] === "custom" && query.from != null && !linked;
   useEffect(() => {
-    if (linked) setStore({ customFrame: { ...linked, shape: SHAPES.includes(query.shape) ? query.shape : "rect", material: ["metal", "titanium", "acetate"].includes(query.material) ? query.material : "acetate" } });
-  }, [query.size, query.shape, query.material]); // eslint-disable-line react-hooks/exhaustive-deps
-  const frame = getFrame(parts[1]) || getFrame(s.lastFrame) || FRAMES[0];
+    const B = Number(query.B);
+    if (linked) setStore({ customFrame: { ...linked, B: B >= 20 && B <= 60 ? B : undefined, shape: normShape(query.shape) || "rect", material: normMaterial(query.material) || "acetate" } });
+  }, [query.size, query.shape, query.material, query.B]); // eslint-disable-line react-hooks/exhaustive-deps
+  const frame = (!failed && getFrame(parts[1])) || (s.lastFrame !== "custom" && getFrame(s.lastFrame)) || FRAMES[0];
   const [indexN, setIndexN] = useState("best");
   const [bridge, setBridge] = useState(s.bridge || "medium");
   const [oil, setOil] = useState(s.skin?.oiliness ?? 60);
@@ -55,11 +58,12 @@ export default function Check({ parts, query = {} }) {
 
   return (
     <div className="stack-lg" ref={root}>
-      <PageHead kicker="Remake-risk check" title={frame.custom ? `Will this ${frame.A}□${frame.DBL} frame work for you?` : `Will ${frame.name} work for you?`} sub="Glasses fail after purchase in four ways. Refract predicts each one before you buy, from optics, physics and your YouCam skin scan." right={<Badge tone="violet"><ShieldCheck size={13} /> First on the web</Badge>} />
+      <PageHead kicker="Remake-risk check" title={failed ? "Which frame were you looking at?" : frame.custom ? `Will this ${frame.A}□${frame.DBL} frame work for you?` : `Will ${frame.name} work for you?`} sub="Glasses fail after purchase in four ways. Refract predicts each one before you buy, from optics, physics and your YouCam skin scan." right={<Badge tone="violet"><ShieldCheck size={13} /> First on the web</Badge>} />
 
-      {query.from && <div className={`callout row ${linked ? "" : "warn"}`} data-reveal>{linked ? <><ScanSearch size={17} color="var(--cyan)" /><span className="small">Checking the <b>{linked.A}□{linked.DBL}</b> frame you were looking at on <b>{query.from}</b>, against your prescription.</span></> : <><AlertTriangle size={17} color="var(--amber)" /><span className="small">Couldn't find a frame size on <b>{query.from}</b>. Select the size text on that page before tapping the bookmark, or type it below.</span></>}</div>}
-      <AnyFrame key={JSON.stringify(s.customFrame)} spec={s.customFrame} active={Boolean(frame.custom)} />
+      {query.from && <div className={`callout row ${linked ? "" : "warn"}`}>{linked ? <><ScanSearch size={17} color="var(--cyan)" /><span className="small">Checking the <b>{linked.A}□{linked.DBL}</b> frame you were looking at on <b>{query.from}</b>, against your prescription.</span></> : <><AlertTriangle size={17} color="var(--amber)" /><span className="small">Couldn't find a frame size on <b>{query.from}</b>. Select the size text on that page before tapping the bookmark, or type it below.</span></>}</div>}
+      <AnyFrame key={JSON.stringify(s.customFrame)} spec={failed ? null : s.customFrame} active={Boolean(frame.custom)} />
 
+      {!failed && <>
       <div className="frame-strip" ref={strip} data-reveal>
         {mine && (
           <button className={`frame-chip mine ${frame.custom ? "on" : ""}`} onClick={() => navigate("/check/custom")}>
@@ -143,11 +147,21 @@ export default function Check({ parts, query = {} }) {
 
       <div className="row wrap" style={{ gap: 10 }} data-reveal>
         <a className="btn primary" href={`#/live/${frame.id}`}>See {frame.name} live through your lenses<ArrowRight size={16} /></a>
-        {frame.custom && <button className="btn" onClick={() => { const f = s.customFrame; const url = `${location.origin}/#/check/custom?${new URLSearchParams({ size: `${f.A}-${f.DBL}-${f.temple || 140}`, shape: f.shape, material: f.material })}`; navigator.clipboard?.writeText(url).then(() => toast("Link copied: anyone can open this check with their own prescription.", "ok"), () => toast(url)); }}><Link2 size={16} />Copy link to this check</button>}
+        {frame.custom && <button className="btn" onClick={() => copyLink(s.customFrame)}><Link2 size={16} />Copy link to this check</button>}
         <a className="btn" href="#/retail">How stores use this</a>
       </div>
+      </>}
     </div>
   );
+}
+
+// A link anyone can open with their own prescription; falls back to showing it where the
+// clipboard API is unavailable (plain http, older browsers).
+function copyLink(f) {
+  const params = { size: `${f.A}-${f.DBL}-${f.temple || 140}`, shape: f.shape, material: f.material, ...(f.B ? { B: f.B } : {}) };
+  const url = `${location.origin}/#/check/custom?${new URLSearchParams(params)}`;
+  if (!navigator.clipboard) { toast(url); return; }
+  navigator.clipboard.writeText(url).then(() => toast("Link copied: anyone can open this check with their own prescription.", "ok"), () => toast(url));
 }
 
 // Side view of the glasses on the nose: arrows scale with the forces in the slip model.
@@ -183,11 +197,12 @@ function AnyFrame({ spec, active }) {
   const [shape, setShape] = useState(spec?.shape || "rect");
   const [material, setMaterial] = useState(spec?.material || "acetate");
   const parsed = parseFrameSize(size);
+  const heightOk = !height || (Number(height) >= 20 && Number(height) <= 60);
   const bm = useRef(null);
   useEffect(() => { bm.current?.setAttribute("href", bookmarklet(location.origin)); }, []); // React blocks javascript: URLs in props
   function go(e) {
     e.preventDefault();
-    if (!parsed) return;
+    if (!parsed || !heightOk) return;
     setStore({ customFrame: { ...parsed, B: Number(height) || undefined, shape, material } });
     navigate("/check/custom");
   }
@@ -203,12 +218,13 @@ function AnyFrame({ spec, active }) {
       </div>
       <form className="any-frame-form" onSubmit={go}>
         <label className="field"><span className="tiny">Size: lens □ bridge arm</span><input className="input mono" value={size} onChange={(e) => setSize(e.target.value)} placeholder="52□18 140" aria-invalid={Boolean(size && !parsed)} /></label>
-        <label className="field"><span className="tiny">Lens height (if listed)</span><input className="input mono" inputMode="numeric" value={height} onChange={(e) => setHeight(e.target.value.replace(/[^0-9.]/g, ""))} placeholder="auto" /></label>
+        <label className="field"><span className="tiny">Lens height (if listed)</span><input className="input mono" inputMode="numeric" value={height} onChange={(e) => setHeight(e.target.value.replace(/[^0-9.]/g, ""))} placeholder="auto" aria-invalid={!heightOk} /></label>
         <label className="field"><span className="tiny">Shape</span><select className="select" value={shape} onChange={(e) => setShape(e.target.value)}>{SHAPES.map((k) => <option key={k} value={k}>{SHAPE_LABEL[k]}</option>)}</select></label>
         <label className="field"><span className="tiny">Material</span><Seg options={[{ value: "acetate", label: "Plastic" }, { value: "metal", label: "Metal" }, { value: "titanium", label: "Titanium" }]} value={material} onChange={setMaterial} /></label>
-        <button className="btn primary" disabled={!parsed}><ShieldCheck size={16} />Check this frame</button>
+        <button className="btn primary" disabled={!parsed || !heightOk}><ShieldCheck size={16} />Check this frame</button>
       </form>
       {size && !parsed && <span className="tiny" style={{ color: "var(--amber)" }}>Type at least the lens width and bridge, like 52-18 (lens 33–66 mm, bridge 12–26 mm).</span>}
+      {!heightOk && <span className="tiny" style={{ color: "var(--amber)" }}>Lens height is usually 20–60 mm; leave it empty and Refract estimates it from the shape.</span>}
       <div className="bm-row">
         <a ref={bm} className="btn sm bm-link" onClick={(e) => { e.preventDefault(); toast("Drag this button to your bookmarks bar, then tap it on any glasses product page.", "info"); }}><Bookmark size={14} />Check with Refract</a>
         <span className="tiny text-2"><b>One tap on any store:</b> drag this to your bookmarks bar. On any glasses product page, tap it and Refract opens with that frame's size, shape and material filled in.</span>

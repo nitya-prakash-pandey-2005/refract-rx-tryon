@@ -66,7 +66,7 @@ About 35–40 units per full profile. The app keeps a units ledger, and the face
 npm install
 cp .env.example .env        # add YOUCAM_API_KEY (and optionally ANTHROPIC_API_KEY)
 npm run dev                 # http://localhost:5190 (app + API on one port)
-npm test                    # 92 tests: optics, sight, slip physics, remake risk, any-frame sizes, bookmarklet, PD, makeup, placement, API routes, MCP (real client), agent, limits
+npm test                    # 97 tests: optics, sight, slip physics, remake risk, any-frame sizes, bookmarklet, PD, makeup, placement, API routes, MCP (real client), agent, limits
 npm run mcp                 # MCP server over stdio for Claude / ChatGPT / any MCP client
 npm run build               # production build in dist/
 ```

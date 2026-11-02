@@ -3,7 +3,7 @@ import { uploadImage, createTask, pollTask, credit, imageMime, YouCamError } fro
 import { unitCost } from "../src/engine/youcam.js";
 import { runAgent, llmProvider } from "./agent.js";
 import { allow, buildParams, budgetLeft, spend } from "./limits.js";
-import { FRAMES, getFrame, parseFrameSize, customFrame } from "../src/engine/frames.js";
+import { FRAMES, SHAPES, getFrame, parseFrameSize, customFrame, normShape, normMaterial } from "../src/engine/frames.js";
 import { remakeRisk } from "../src/engine/risk.js";
 import { sanitizeRx, parseDiopter, RANGES } from "../src/engine/rxinput.js";
 
@@ -83,11 +83,17 @@ function riskApi(body) {
   const face = { faceWidthMm: Number(body.face?.faceWidthMm) || undefined, noseWidthMm: Number(body.face?.noseWidthMm) || undefined, bridge: ["low", "medium", "high"].includes(body.face?.bridge) ? body.face.bridge : "medium" };
   const oil = Number(body.oiliness);
   const oiliness = body.oiliness != null && Number.isFinite(oil) ? Math.max(0, Math.min(100, oil)) : 60;
-  if (body.frame && typeof body.frame === "object") {
-    const size = body.frame.size != null ? parseFrameSize(body.frame.size) : parseFrameSize(`${body.frame.A}-${body.frame.DBL}`);
-    if (!size) throw new YouCamError("Send frame as { size: \"52-18-140\", shape, material } (lens width 33-66 mm, bridge 12-26 mm).", "BadFrame", 400);
-    const frame = customFrame({ ...size, B: body.frame.B, shape: body.frame.shape, material: body.frame.material });
-    return { frameId: "custom", size: `${frame.A}-${frame.DBL}-${frame.temple}`, ...publicRisk(remakeRisk({ frame, rx, pd, face, oiliness })) };
+  if (body.frame != null) {
+    const f = typeof body.frame === "string" ? { size: body.frame } : body.frame;
+    const bad = (msg) => new YouCamError(`${msg} Send frame as { size: "52-18-140", shape, material }.`, "BadFrame", 400);
+    if (typeof f !== "object" || Array.isArray(f)) throw bad("frame must be an object or a size string.");
+    const size = f.size != null ? parseFrameSize(f.size) : parseFrameSize(`${f.A}-${f.DBL}`);
+    if (!size) throw bad("Could not read the frame size (lens width 33-66 mm, bridge 12-26 mm).");
+    const shape = f.shape == null ? "rect" : normShape(f.shape), material = f.material == null ? "acetate" : normMaterial(f.material);
+    if (!shape) throw bad(`Unknown shape "${f.shape}"; use one of ${SHAPES.join(", ")}.`);
+    if (!material) throw bad(`Unknown material "${f.material}"; use acetate, metal or titanium.`);
+    const frame = customFrame({ ...size, B: f.B, shape, material });
+    return { frameId: "custom", size: `${frame.A}-${frame.DBL}-${frame.temple}`, frame: { shape: frame.shape, material: frame.material, lensHeightMm: frame.B, estimatedWeightG: frame.weightG }, ...publicRisk(remakeRisk({ frame, rx, pd, face, oiliness })) };
   }
   if (body.frameId) {
     const frame = body.frameId === "custom" ? undefined : getFrame(body.frameId);

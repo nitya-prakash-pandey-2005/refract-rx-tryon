@@ -46,14 +46,22 @@ export function parseFrameSize(text) {
   return { A, DBL, temple: temple >= 115 && temple <= 160 ? temple : null };
 }
 
+// Store listings name shapes and materials many ways; null means "not a shape/material we know".
+const SHAPE_ALIASES = { rectangle: "rect", rectangular: "rect", "cat-eye": "cat", "cat eye": "cat", cateye: "cat", geometric: "geo", hexagonal: "geo", octagonal: "geo", pilot: "aviator", clubmaster: "browline", pantos: "panto" };
+const MATERIAL_ALIASES = { plastic: "acetate", acetate: "acetate", tr90: "acetate", nylon: "acetate", steel: "metal", "stainless steel": "metal", wire: "metal", metal: "metal", titanium: "titanium" };
+export const normShape = (s) => { const k = String(s ?? "").trim().toLowerCase(); return SHAPES.includes(k) ? k : Object.hasOwn(SHAPE_ALIASES, k) ? SHAPE_ALIASES[k] : null; };
+export const normMaterial = (m) => { const k = String(m ?? "").trim().toLowerCase(); return Object.hasOwn(MATERIAL_ALIASES, k) ? MATERIAL_ALIASES[k] : null; };
+// Face shapes a typed frame suits: the union of catalogue frames with the same lens shape.
+const faceShapesFor = (shape) => [...new Set(FRAMES.filter((f) => f.shape === shape).flatMap((f) => f.faceShapes))];
+
 export function customFrame({ A, DBL, B, temple, shape = "rect", material = "acetate" }) {
-  const sh = SHAPES.includes(shape) ? shape : "rect";
-  const mat = GRAMS_PER_MM[material] ? material : "acetate";
+  const sh = normShape(shape) || "rect";
+  const mat = normMaterial(material) || "acetate";
   const height = Number(B) >= 20 && Number(B) <= 60 ? Number(B) : Math.round(A * HEIGHT_RATIO[sh]);
   return {
     id: "custom", name: `Your ${A}□${DBL}`, custom: true, shape: sh, A, B: height, DBL, temple: temple || 140,
     rim: mat === "acetate" ? 4.5 : 1.3, material: mat, weightG: Math.round(A * GRAMS_PER_MM[mat]),
-    pads: mat === "acetate" ? "fixed" : "adjustable", colorway: COLORWAYS[mat], priceUsd: 0, faceShapes: [],
+    pads: mat === "acetate" ? "fixed" : "adjustable", colorway: COLORWAYS[mat], priceUsd: 0, faceShapes: faceShapesFor(sh),
   };
 }
 
