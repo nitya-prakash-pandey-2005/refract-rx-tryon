@@ -14,6 +14,7 @@ import { smoother } from "../vision/smooth";
 import { drawFrame, drawLensGloss, drawXray } from "../vision/compose";
 import { acceptPhoto } from "../lib/capture";
 import FrameArt from "../components/FrameArt";
+import { isEmbed, sendToStore } from "../lib/embed";
 import DemoPicker from "../components/DemoPicker";
 
 const fmtD = (v) => (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v).toFixed(2);
@@ -119,6 +120,13 @@ export default function Live({ parts }) {
     }
   }
 
+  function addToCart() {
+    const lens = { n: fit.lens.best.n, label: fit.lens.best.label, priceUsd: fit.lens.best.priceUsd, maxEdge: Math.max(fit.lens.od.maxEdge, fit.lens.os.maxEdge), weightG: fit.lens.od.weightG + fit.lens.os.weightG };
+    if (sendToStore({ id: frame.id, name: frame.name, priceUsd: frame.priceUsd, lens })) return toast(`${frame.name} sent to the store cart.`, "ok");
+    setStore((st) => ({ bag: [...st.bag.filter((b) => b.kind !== "frame"), { kind: "frame", id: frame.id, name: `${frame.name} · ${frame.colorway.name}`, priceUsd: frame.priceUsd, lens, rx: st.rx, pd: st.measure?.pd }] }));
+    toast(`${frame.name} with ${lens.label} lenses added to your bag.`, "ok");
+  }
+
   async function snapshot() {
     const v = video.current;
     const c = document.createElement("canvas");
@@ -192,7 +200,10 @@ export default function Live({ parts }) {
               <div className="stat"><div className="v">${frame.priceUsd + fit.lens.best.priceUsd}</div><div className="l">Frame + lenses</div></div>
             </div>
             <p className="small text-2" style={{ marginTop: 10 }}>{fit.lens.note}</p>
-            <a className="btn block" href="#/rx" style={{ marginTop: 6 }}>Change prescription</a>
+            <div className="stack-sm" style={{ marginTop: 6 }}>
+              <button className="btn primary block" onClick={addToCart}>{isEmbed() ? "Add to store cart" : "Add frame + lenses to bag"}</button>
+              <a className="btn block ghost" href="#/rx">Change prescription</a>
+            </div>
           </Card>
           <Card title="What you're seeing" right={<Hud tone="cyan">physics</Hud>}>
             <ul className="small text-2 how">

@@ -7,6 +7,7 @@ import { start } from "./tour/engine";
 import { Toasts } from "./ui";
 import { useStore } from "./state/store";
 import "./tour/steps";
+import { isEmbed, storeHost } from "./lib/embed";
 import Home from "./pages/Home";
 import Live from "./pages/Live";
 import Scan from "./pages/Scan";
@@ -53,6 +54,7 @@ const TITLES = [
   ["/retail", "For retailers", "Catalogue Rx audit"],
   ["/", "Refract", "Prescription-true try-on"],
 ];
+const EMBED_TABS = [["/live", "Live"], ["/studio", "Photo"], ["/rx", "My Rx"], ["/scan", "Scan"]];
 const ROUTES = { "/": Home, "/live": Live, "/scan": Scan, "/rx": Rx, "/profile": Profile, "/frames": Frames, "/studio": Studio, "/agent": Agent, "/bag": Bag, "/retail": Retail };
 
 export default function App() {
@@ -61,6 +63,20 @@ export default function App() {
   const base = "/" + (route.parts[0] || "");
   const Page = ROUTES[base] || Home;
   useEffect(() => { window.scrollTo(0, 0); }, [base]);
+  if (isEmbed()) {
+    return (
+      <div className="embed-shell">
+        <header className="embed-bar">
+          <a href="#/live" className="row" style={{ gap: 8 }}><img src="/icons/icon.svg" width="26" height="26" alt="" /><b>Refract</b><span className="tiny muted desktop-only">prescription-true try-on for {storeHost()}</span></a>
+          <nav className="embed-tabs">
+            {EMBED_TABS.map(([to, label]) => <a key={to} href={`#${to}`} className={base === to ? "on" : ""}>{label}</a>)}
+          </nav>
+        </header>
+        <main className="embed-main"><Page query={route.query} parts={route.parts} key={base} /></main>
+        <Toasts />
+      </div>
+    );
+  }
   return (
     <>
       <AppShell

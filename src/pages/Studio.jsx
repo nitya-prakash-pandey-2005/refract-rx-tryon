@@ -15,6 +15,7 @@ import NeedPhoto from "../components/NeedPhoto";
 import FrameArt from "../components/FrameArt";
 import LensSection from "../components/LensSection";
 import { rxKey } from "../lib/pipeline";
+import { sendToStore } from "../lib/embed";
 
 const fmtD = (v) => (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v).toFixed(2);
 const usd = (v) => `$${v.toFixed(0)}`;
@@ -102,7 +103,8 @@ function StudioInner({ s, frameId }) {
 
   const addToBag = () => {
     setStore((st) => ({ bag: [...st.bag.filter((b) => b.kind !== "frame"), { kind: "frame", id: frame.id, name: `${frame.name} · ${frame.colorway.name}`, priceUsd: frame.priceUsd, lens: { n: index.n, label: index.label, priceUsd: index.priceUsd, maxEdge, weightG: weight }, rx: st.rx, pd: st.measure.pd }] }));
-    toast(`${frame.name} with ${index.label} lenses added to your bag.`, "ok");
+    const sent = sendToStore({ id: frame.id, name: frame.name, priceUsd: frame.priceUsd, lens: { n: index.n, label: index.label, priceUsd: index.priceUsd, maxEdge, weightG: weight } });
+    toast(sent ? `${frame.name} with ${index.label} lenses sent to the store cart.` : `${frame.name} with ${index.label} lenses added to your bag.`, "ok");
   };
   const addLook = () => {
     setStore((st) => ({ bag: [...st.bag.filter((b) => b.kind !== "makeup"), ...rxLook.products.map((p) => ({ kind: "makeup", ...p }))] }));

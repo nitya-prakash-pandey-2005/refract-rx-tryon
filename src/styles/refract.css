@@ -152,3 +152,14 @@ i.lg { display: inline-block; width: 12px; height: 12px; border-radius: 4px; ver
 .live-stage.on canvas { opacity: 1; }
 .live-stage.mirror canvas { transform: scaleX(-1); }
 .live-pd { position: absolute; left: 12px; bottom: 12px; font-size: 11.5px; padding: 5px 10px; border-radius: 999px; background: rgba(5, 6, 15, 0.72); backdrop-filter: blur(8px); color: var(--cyan); }
+
+/* ---------- embed (inside a store's modal) ---------- */
+.embed-shell { min-height: 100vh; background: var(--bg); }
+.embed-bar { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 56px 10px 16px; background: rgba(5, 6, 15, 0.86); backdrop-filter: blur(12px); border-bottom: 1px solid var(--line); }
+.embed-bar a { text-decoration: none; color: var(--text); }
+.embed-tabs { display: flex; gap: 4px; }
+.embed-tabs a { padding: 7px 12px; border-radius: 10px; font-size: 13px; font-weight: 600; color: var(--muted); }
+.embed-tabs a.on { background: var(--surface-2); color: var(--text); }
+.embed-main { padding: 16px; max-width: 1400px; margin: 0 auto; }
+.embed-main .page-head { display: none; }
+.embed-main .live-stage, .embed-main .studio-stage { max-height: 58vh; }
