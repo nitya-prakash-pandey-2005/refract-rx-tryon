@@ -23,8 +23,8 @@ test("meridian power at 90° from the axis is sphere plus cylinder", () => {
   assert.equal(meridianPower({ sph: -2, cyl: -1, axis: 90 }, 90), -2);
 });
 
-test("minus lens shrinks the eye about 6.7% at -6 D", () => {
-  assert.ok(Math.abs(eyeMagnification(-6) - 0.933) < 0.001);
+test("minus lens shrinks the eye about 8.3% at -6 D (iris 15 mm behind the lens)", () => {
+  assert.ok(Math.abs(eyeMagnification(-6) - 0.917) < 0.001);
   assert.ok(eyeMagnification(3) > 1);
   assert.equal(eyeMagnification(0), 1);
 });

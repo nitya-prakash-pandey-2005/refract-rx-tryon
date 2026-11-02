@@ -16,12 +16,12 @@ export function lensContourAtOC(frame, monoPd, side) {
   return frameContour(frame).map(([x, y]) => [flip * x + flip * dec, y + PUPIL_ABOVE_BOX_CENTRE]);
 }
 
-export function lensPair({ frame, rx, pd, index, weight = true }) {
+export function lensPair({ frame, rx, pd, index, weight = true, rowWeights = true }) {
   const od = lensContourAtOC(frame, pd.right, "od");
   const os = lensContourAtOC(frame, pd.left, "os");
   if (index) return { best: index, od: lensProfile({ rx: rx.od, contour: od, n: index, weight }), os: lensProfile({ rx: rx.os, contour: os, n: index, weight }) };
-  const recOd = recommendIndex({ rx: rx.od, contour: od });
-  const recOs = recommendIndex({ rx: rx.os, contour: os });
+  const recOd = recommendIndex({ rx: rx.od, contour: od, weight: rowWeights });
+  const recOs = recommendIndex({ rx: rx.os, contour: os, weight: rowWeights });
   const lead = recOd.best.n >= recOs.best.n ? recOd : recOs;
   const best = lead.best;
   return {

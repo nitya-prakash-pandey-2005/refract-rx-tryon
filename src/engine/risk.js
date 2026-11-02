@@ -12,14 +12,16 @@ const G = 9.81;
 export const FIT = {
   noseShare: 0.65, // share of spectacle weight carried by the nose (rest on the ears)
   slopeDeg: 30, // effective incline of the nasal surface the pads sit on
-  mu: { adjustable: 0.6, fixed: 0.4 }, // dry skin friction: silicone pads vs polished acetate
-  oilyFriction: 0.6, // friction multiplier at the oiliest skin (sebum lubricates the contact)
+  mu: { adjustable: 0.61, fixed: 0.45 }, // in-vivo skin friction: silicone 0.61 (Zhang & Mak 1999); hard pads ~0.45
+  oilLoss: { adjustable: 0.15, fixed: 0.4 }, // grip lost on the oiliest skin: lipid films lubricate hard, smooth pads most
   bridge: { low: 0.6, medium: 1, high: 1.1 }, // fixed bridges sit poorly on low nasal bridges
   gripPerMm: 0.08, // N of temple clamping per mm the head is wider than the frame front
-  gripMax: 0.6,
+  gripMax: 0.68, // 2 × 0.34 N, the most comfortable clamp per temple (Zhang, Chen & Luximon 2024)
   holdN: 0.08, // weight-independent hold: ear support and pad adhesion
   dynamicG: 0.3, // head movement (walking, nodding) adds ~0.3 g of tangential load
-  padAreaMm2: { adjustable: 140, fixed: 90 },
+  padAreaMm2: { adjustable: 144, fixed: 80 }, // pad area × contact fraction (hard bridges touch only part of the nose)
+  marksKPa: 4.3, // sustained pressure above capillary closure (~32 mmHg) leaves marks
+  painKPa: 14.7, // design upper limit for nose pads (150 g/cm²)
 };
 export const PRISM_TOLERANCE = 0.67; // ANSI Z80.1 unwanted horizontal prism (Δ)
 
@@ -32,7 +34,7 @@ export function slipRisk({ frame, lensWeightG, face = {}, oiliness = 60 }) {
   const Wn = (totalWeightG / 1000) * G * FIT.noseShare;
   const th = (FIT.slopeDeg * Math.PI) / 180;
   const pads = frame.pads || "fixed";
-  const oil = 1 - (1 - FIT.oilyFriction) * (1 - clamp(oiliness, 0, 100) / 100);
+  const oil = 1 - FIT.oilLoss[pads] * (1 - clamp(oiliness, 0, 100) / 100); // oiliness score: higher = less oily
   const bridgeKey = face.bridge || "medium";
   let bridge = FIT.bridge[bridgeKey] ?? 1;
   if (bridgeKey === "low" && (pads === "adjustable" || frame.lowBridgeFit)) bridge = 0.95; // pads/raised bridge reach the nose
@@ -65,6 +67,7 @@ export function slipRisk({ frame, lensWeightG, face = {}, oiliness = 60 }) {
     level: margin < 1.0 ? "high" : margin < 1.5 ? "medium" : "low",
     totalWeightG,
     pressureKPa,
+    pressureLevel: pressureKPa > FIT.painKPa ? "painful" : pressureKPa > FIT.marksKPa ? "marks" : "ok",
     drivers,
     fixes,
     inputs: { pads, bridge: bridgeKey, oiliness, gapMm: gap, gripN: grip, frictionCoeff: muEff },
@@ -84,7 +87,7 @@ export function pdRisk({ rx, pdPlusMinus }) {
 }
 
 export function remakeRisk({ frame, rx, pd, face = {}, oiliness = 60, index }) {
-  const lens = lensPair({ frame, rx, pd, index });
+  const lens = lensPair({ frame, rx, pd, index, rowWeights: false });
   const se = [spherEq(rx.od), spherEq(rx.os)].reduce((a, b) => (Math.abs(b) > Math.abs(a) ? b : a));
   const minus = se <= 0;
   const thick = minus ? Math.max(lens.od.maxEdge, lens.os.maxEdge) : Math.max(lens.od.centre, lens.os.centre);

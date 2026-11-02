@@ -6,9 +6,9 @@
 export const INDICES = [
   { n: 1.5, label: "1.50 Standard", density: 1.32, abbe: 58, minCenter: 2.0, priceUsd: 0 },
   { n: 1.59, label: "1.59 Polycarbonate", density: 1.2, abbe: 30, minCenter: 1.0, priceUsd: 30 },
-  { n: 1.6, label: "1.60 Thin", density: 1.3, abbe: 42, minCenter: 1.5, priceUsd: 49 },
+  { n: 1.6, label: "1.60 Thin", density: 1.3, abbe: 41, minCenter: 1.5, priceUsd: 49 },
   { n: 1.67, label: "1.67 Extra thin", density: 1.35, abbe: 32, minCenter: 1.5, priceUsd: 89 },
-  { n: 1.74, label: "1.74 Ultra thin", density: 1.47, abbe: 33, minCenter: 1.5, priceUsd: 149 },
+  { n: 1.74, label: "1.74 Ultra thin", density: 1.47, abbe: 32, minCenter: 1.5, priceUsd: 149 },
 ];
 export const MIN_EDGE = 1.0;
 export const EDGE_TARGET = 4.5; // mm: max edge a minus lens may show before it reads "thick"
@@ -24,8 +24,10 @@ export function meridianPower(rx, thetaDeg) {
   return rx.sph + rx.cyl * s * s;
 }
 
-// Apparent size of the eye seen through the lens: the eye sits d metres behind it.
-export const eyeMagnification = (F, d = 0.012) => 1 / (1 - d * F);
+// Apparent size of the eye seen through the lens: the iris sits d metres behind it
+// (12 mm vertex + ~3 mm anterior chamber), so observers see it through a thin lens at d.
+export const EYE_TO_LENS_M = 0.015;
+export const eyeMagnification = (F, d = EYE_TO_LENS_M) => 1 / (1 - d * F);
 
 export function sag(r, F, n) {
   if (!F) return 0;
@@ -79,11 +81,11 @@ export function lensProfile({ rx, contour, n, weight = true }) {
   };
 }
 
-export function recommendIndex({ rx, contour }) {
+export function recommendIndex({ rx, contour, weight = true }) {
   const minus = spherEq(rx) <= 0;
   const target = minus ? EDGE_TARGET : CENTRE_TARGET;
   const metric = (p) => (minus ? p.maxEdge : p.centre);
-  const rows = INDICES.map((index) => ({ index, profile: lensProfile({ rx, contour, n: index }) }));
+  const rows = INDICES.map((index) => ({ index, profile: lensProfile({ rx, contour, n: index, weight }) }));
   const best = rows.find((r) => metric(r.profile) <= target) || rows[rows.length - 1];
   const table = rows.map((r) => ({
     ...r,

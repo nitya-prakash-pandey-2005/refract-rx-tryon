@@ -42,3 +42,13 @@ test("remake risk combines look, sight, fit and measure into one explained score
   const easy = remakeRisk({ frame: nori, rx: { od: { sph: -1, cyl: 0, axis: 0 }, os: { sph: -1, cyl: 0, axis: 0 } }, pd: { left: 31.5, right: 31.5, plusMinus: 0.5 }, face, oiliness: 80 });
   assert.ok(easy.score < r.score);
 });
+
+test("silicone pads lose less grip on oily skin than hard pads (skin tribology)", () => {
+  const drop = (frame) => slipRisk({ frame, lensWeightG: 14, face, oiliness: 90 }).inputs.frictionCoeff / slipRisk({ frame, lensWeightG: 14, face, oiliness: 10 }).inputs.frictionCoeff;
+  assert.ok(drop(nori) < drop(juno)); // dry÷oily friction ratio: silicone loses less grip
+});
+
+test("nose pressure flags marks above the capillary threshold", () => {
+  const r = slipRisk({ frame: juno, lensWeightG: 30, face, oiliness: 50 });
+  assert.ok(["ok", "marks", "painful"].includes(r.pressureLevel));
+});

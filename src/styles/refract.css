@@ -207,3 +207,16 @@ i.lg { display: inline-block; width: 12px; height: 12px; border-radius: 4px; ver
 .material-row { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; margin: 10px 0; }
 .slip-svg { width: 100%; height: auto; display: block; margin-bottom: 8px; color: var(--text-2); }
 .field .seg { width: 100%; }
+
+/* ---------- retailer saas ---------- */
+.risk-bar-row { display: grid; grid-template-columns: 110px minmax(0, 1fr) 64px; gap: 10px; align-items: center; }
+.risk-bar { display: flex; height: 12px; border-radius: 999px; overflow: hidden; background: var(--surface-2); }
+.risk-bar i { display: block; height: 100%; transition: width .8s cubic-bezier(.22,1,.36,1); }
+.risk-bar .lo { background: var(--green); } .risk-bar .me { background: var(--amber); } .risk-bar .hi { background: var(--rose); }
+.plan { display: grid; gap: 8px; align-content: start; }
+.plan-price { font-family: var(--font-display); font-size: 36px; font-weight: 700; letter-spacing: -0.02em; }
+.plan-price small { font-size: 13px; color: var(--muted); font-weight: 500; margin-left: 4px; }
+.plan-list { list-style: none; padding: 0; margin: 4px 0 8px; display: grid; gap: 6px; font-size: 13px; color: var(--text-2); }
+.plan-list li { display: flex; gap: 8px; align-items: center; }
+.plan-list svg { color: var(--green); flex: none; }
+.api-out { max-height: 260px; overflow: auto; }

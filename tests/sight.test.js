@@ -29,3 +29,11 @@ test("materialSight ranks every index for a prescription", () => {
   assert.ok(poly.tcaAt10mm > crown.tcaAt10mm);
   assert.ok(rows.every((r) => typeof r.verdict === "string"));
 });
+
+import { perceivedArcmin, acuityLossLines } from "../src/engine/sight.js";
+test("perceived fringe and acuity cost follow Winter et al. 2015", () => {
+  assert.ok(Math.abs(perceivedArcmin(1) - 0.49) < 1e-9);
+  // 0.2 Δ of TCA ≈ 1 chart line lost (Meslin & Obrecht: 5–7.5 arcmin per line)
+  const lines = acuityLossLines(0.2 * 30, 30); // prism 6 Δ through Abbe 30
+  assert.ok(lines > 0 && lines < 1.5);
+});

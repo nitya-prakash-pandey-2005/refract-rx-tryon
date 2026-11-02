@@ -102,10 +102,11 @@ export default function Check({ parts }) {
                 <b>{r.index.n.toFixed(2)}</b>
                 <span className="tiny">Abbe {r.abbe}</span>
                 <span className="tiny muted">Ø {Number.isFinite(r.cleanZoneMm) ? r.cleanZoneMm.toFixed(0) : "∞"} mm clean</span>
+                <span className="tiny" style={{ color: r.linesLost >= 1 ? "var(--rose)" : r.linesLost >= 0.6 ? "var(--amber)" : "var(--green)" }}>−{r.linesLost.toFixed(1)} chart lines</span>
               </button>
             ))}
           </div>
-          <p className="small text-2">Thinner is not always clearer: 1.67 and 1.74 split colours almost as much as polycarbonate. At your power, 1.60 and 1.50 keep a wider colour-clean zone. The dashed circle shows where you'll see no fringes.</p>
+          <p className="small text-2">Thinner is not always clearer: 1.67 and 1.74 split colours almost as much as polycarbonate. "Chart lines" is the sharpness you lose when you glance 10 mm off-centre, from measured colour-fringe perception (Winter et al., JOSA A 2015). The dashed circle is your colour-clean zone.</p>
         </Card>
 
         <Card className="span-5" title="Fit: will they slide?" icon={GaugeIcon} right={<Hud tone="pink">physics</Hud>} data-reveal>

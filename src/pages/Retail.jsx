@@ -6,6 +6,7 @@ import { FRAMES } from "../engine/frames";
 import { lensPair } from "../engine/fit";
 import { INDICES, EDGE_TARGET, CENTRE_TARGET } from "../engine/optics";
 import FrameArt from "../components/FrameArt";
+import RemakeDashboard from "../components/RemakeDashboard";
 
 const RX = Array.from({ length: 17 }, (_, i) => -10 + i); // −10 … +6 D
 const PD = { left: 31.5, right: 31.5 };
@@ -47,7 +48,9 @@ export default function Retail() {
 
   return (
     <div className="stack-lg" ref={root}>
-      <PageHead kicker="For retailers" title="Catalogue Rx audit" sub="Which of your frames still look good with strong prescriptions, computed from frame dimensions alone. No photos needed." right={<Seg options={INDICES.filter((i) => i.n >= 1.6).map((i) => ({ value: i.n, label: i.n.toFixed(2) }))} value={n} onChange={setN} />} />
+      <PageHead kicker="Refract for retailers · SaaS" title="Predict remakes before checkout" sub="7.6% of prescription glasses get redone. Refract scores every order for the four ways glasses fail, and fixes them while the shopper is still on your site." right={<Seg options={INDICES.filter((i) => i.n >= 1.6).map((i) => ({ value: i.n, label: i.n.toFixed(2) }))} value={n} onChange={setN} />} />
+      <RemakeDashboard />
+      <div className="section-head" data-reveal><Hud tone="cyan">Catalogue Rx audit</Hud><h2>Which of your frames still look good with strong lenses?</h2></div>
       <div className="grid g4 keep-2" data-reveal>
         <Card className="tight"><Stat value={`${at(-2)}/12`} label="Frames under 4.5 mm at −2 D" tone="green" /></Card>
         <Card className="tight"><Stat value={`${at(-4)}/12`} label="… at −4 D" tone="cyan" /></Card>

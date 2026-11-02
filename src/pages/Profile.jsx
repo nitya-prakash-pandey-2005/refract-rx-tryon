@@ -17,6 +17,7 @@ const FEATURE_NAME = { "face-attr-analysis": "Face Analyzer", "skin-analysis": "
 const SKIN_ROWS = [
   ["darkCircle", "Dark circles"], ["eyeBag", "Eye bags"], ["crowfeet", "Crow's feet"], ["periocular", "Fine lines around the eye"],
   ["wrinkle", "Wrinkles (whole face)"], ["droopyUpper", "Upper-lid droop"], ["droopyLower", "Lower-lid droop"], ["tearTrough", "Tear trough"],
+  ["oiliness", "Oiliness (nose-pad grip → Fit Check)"],
 ];
 const tone = (v) => (v >= 70 ? "var(--green)" : v >= 50 ? "var(--amber)" : "var(--rose)");
 

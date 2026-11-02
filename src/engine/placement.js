@@ -3,7 +3,7 @@
 import { frameContour } from "./frames.js";
 import { PUPIL_ABOVE_BOX_CENTRE } from "./fit.js";
 
-export const EYE_DEPTH_M = 0.012; // cornea sits ~12 mm behind the lens
+export const EYE_DEPTH_M = 0.015; // iris plane: 12 mm vertex + ~3 mm anterior chamber
 export const DEPTH_GAIN = 0.00035; // m of extra depth per mm away from the optical centre (face curves away)
 
 export function placeFrame({ landmarks, W, H, mmPerPx, frame, rx }) {
