@@ -234,3 +234,6 @@ i.lg { display: inline-block; width: 12px; height: 12px; border-radius: 4px; ver
 .bm-row { display: flex; gap: 12px; align-items: center; padding-top: 10px; border-top: 1px dashed var(--line); }
 .bm-link { flex: none; cursor: grab; border-style: dashed; }
 .callout.warn { border-color: rgba(251, 191, 36, 0.4); }
+.vs, .vs-form { display: grid; gap: 8px; padding: 12px; border-radius: 12px; background: var(--surface); border: 1px solid var(--line); }
+.vs-grid { display: grid; grid-template-columns: auto 1fr auto; gap: 4px 12px; align-items: baseline; }
+.vs-open { justify-self: start; }

@@ -5,7 +5,8 @@ import { bookmarklet } from "../lib/bookmarklet";
 import { useStore, setStore } from "../state/store";
 import { navigate } from "../lib/router";
 import { countUp, useReveal } from "../lib/anim";
-import { FRAMES, SHAPES, getFrame, parseFrameSize } from "../engine/frames";
+import { FRAMES, SHAPES, getFrame, parseFrameSize, customFrame } from "../engine/frames";
+import { lensPair } from "../engine/fit";
 import { INDICES } from "../engine/optics";
 import { remakeRisk } from "../engine/risk";
 import { materialSight } from "../engine/sight";
@@ -84,6 +85,7 @@ export default function Check({ parts, query = {} }) {
             <Badge tone={TONE[risk.level]}>{WORD[risk.level]}</Badge>
           </div>
           {asOrdered.score !== risk.score && <p className="small text-2">As first configured: <b>{asOrdered.score}</b>. Your changes moved it by <b className={risk.score < asOrdered.score ? "good" : "bad"}>{risk.score - asOrdered.score > 0 ? "+" : ""}{risk.score - asOrdered.score}</b>.</p>}
+          <VsMine frame={frame} rx={s.rx} pd={pd} index={index || risk.lens.best} mine={s.myGlasses} />
           <div className="divider" />
           <Hud>What if…</Hud>
           <label className="field"><span className="small">Lens material</span>
@@ -223,5 +225,64 @@ function TempleArm({ text }) {
       <text x="20" y="20" fill="var(--cyan)" style={{ font: "600 11px var(--font-mono)" }}>{text}</text>
       <text x="20" y="46" fill="var(--muted)" style={{ font: "500 9px var(--font-mono)" }}>lens · bridge · arm (mm)</text>
     </svg>
+  );
+}
+
+// "Better or worse than what I wear now?": the same prescription in the shopper's current frame.
+const LENS_NOW = [{ value: "same", label: "Don't know" }, { value: 1.5, label: "Standard" }, { value: 1.67, label: "Thin" }, { value: 1.74, label: "Ultra-thin" }];
+function VsMine({ frame, rx, pd, index, mine }) {
+  const [open, setOpen] = useState(false);
+  const [size, setSize] = useState(mine ? `${mine.A}□${mine.DBL} ${mine.temple || 140}` : "");
+  const [material, setMaterial] = useState(mine?.material || "acetate");
+  const [n, setN] = useState(mine?.n ?? "same");
+  const parsed = parseFrameSize(size);
+  const cmp = useMemo(() => {
+    if (!mine) return null;
+    const cur = customFrame(mine);
+    const curIndex = mine.n ? INDICES.find((i) => i.n === mine.n) : index;
+    const a = lensPair({ frame, rx, pd, index }), b = lensPair({ frame: cur, rx, pd, index: curIndex });
+    const minus = rx.od.sph + rx.od.cyl / 2 <= 0;
+    const thick = (l) => (minus ? Math.max(l.od.maxEdge, l.os.maxEdge) : Math.max(l.od.centre, l.os.centre));
+    const grams = (l, f) => l.od.weightG + l.os.weightG + f.weightG;
+    return { minus, curIndex, edge: [thick(a), thick(b)], g: [grams(a, frame), grams(b, cur)] };
+  }, [mine, frame, JSON.stringify(rx), pd.left, pd.right, index]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  function save(e) {
+    e.preventDefault();
+    if (!parsed) return;
+    setStore({ myGlasses: { ...parsed, shape: "rect", material, n: n === "same" ? undefined : n } });
+    setOpen(false);
+  }
+  if (open) {
+    return (
+      <form className="vs-form" onSubmit={save}>
+        <span className="small"><b>The glasses you wear now:</b> type the size printed inside their arm</span>
+        <div className="row wrap" style={{ gap: 8 }}>
+          <input className="input mono" style={{ width: 130 }} value={size} onChange={(e) => setSize(e.target.value)} placeholder="52□18 140" aria-label="Size of your current glasses" />
+          <Seg options={[{ value: "acetate", label: "Plastic" }, { value: "metal", label: "Metal" }]} value={material} onChange={setMaterial} />
+        </div>
+        <label className="field"><span className="tiny">Their lenses</span><Seg options={LENS_NOW} value={n} onChange={setN} /></label>
+        <div className="row" style={{ gap: 8 }}><button className="btn sm primary" disabled={!parsed}>Compare</button><button type="button" className="btn sm ghost" onClick={() => setOpen(false)}>Cancel</button></div>
+      </form>
+    );
+  }
+  if (!cmp) return <button className="btn sm vs-open" onClick={() => setOpen(true)}><Glasses size={15} />Compare with the glasses I wear now</button>;
+
+  const delta = (key, unit, dec, lowerIsBetter = true) => {
+    const diff = cmp[key][0] - cmp[key][1];
+    const tone = Math.abs(diff) < (dec ? 0.2 : 1) ? "" : (lowerIsBetter ? diff < 0 : diff > 0) ? "good" : "bad";
+    return <b className={`num small ${tone}`}>{diff > 0 ? "+" : diff < 0 ? "−" : "±"}{Math.abs(diff).toFixed(dec)}{unit}</b>;
+  };
+  const dEdge = cmp.edge[0] - cmp.edge[1], dG = cmp.g[0] - cmp.g[1];
+  const verdict = dEdge > 1 ? "Clearly thicker than what you wear now: you will notice." : dEdge > 0.3 ? "Slightly thicker than your current pair." : dEdge < -0.3 && dG < -1 ? "Thinner and lighter than what you wear now." : dEdge < -0.3 ? "Thinner than your current pair." : dG > 4 ? "About as thick, but heavier on your nose." : "About the same as what you wear now.";
+  return (
+    <div className="vs">
+      <div className="row between"><Hud>vs your {mine.A}□{mine.DBL}{mine.n ? ` · ${cmp.curIndex.label.split(" ")[0]}` : ""}</Hud><button className="tiny link" onClick={() => setOpen(true)}>change</button></div>
+      <div className="vs-grid">
+        <span className="tiny muted">{cmp.minus ? "Edge" : "Centre"}</span><span className="num small">{cmp.edge[0].toFixed(1)} vs {cmp.edge[1].toFixed(1)} mm</span>{delta("edge", " mm", 1)}
+        <span className="tiny muted">Weight</span><span className="num small">{cmp.g[0].toFixed(0)} vs {cmp.g[1].toFixed(0)} g</span>{delta("g", " g", 0)}
+      </div>
+      <span className="small">{verdict}{!mine.n && <span className="tiny muted"> Same lens assumed in both.</span>}</span>
+    </div>
   );
 }

@@ -20,6 +20,7 @@ const DEFAULT = {
   index: null, // chosen lens index n
   lastFrame: "pico",
   customFrame: null, // { A, DBL, temple, B?, shape, material }: a frame from any store, by its printed size
+  myGlasses: null, // the pair the shopper wears today: { A, DBL, temple, shape, material, n? }
 };
 
 function load() {
