@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Home as HomeIcon, ScanFace, Glasses, Sparkles, MessageCircle, Ruler, UserRound, ShoppingBag, Store, PlayCircle, Aperture } from "lucide-react";
+import { Home as HomeIcon, ScanFace, Glasses, Sparkles, MessageCircle, Ruler, UserRound, ShoppingBag, Store, PlayCircle, Aperture, ShieldCheck } from "lucide-react";
 import { useRoute } from "./lib/router";
 import AppShell from "./shell/AppShell";
 import Tour from "./tour/Tour";
@@ -10,6 +10,7 @@ import "./tour/steps";
 import { isEmbed, storeHost, bridgeEscape } from "./lib/embed";
 import Home from "./pages/Home";
 import Live from "./pages/Live";
+import Check from "./pages/Check";
 import Scan from "./pages/Scan";
 import Rx from "./pages/Rx";
 import Profile from "./pages/Profile";
@@ -23,6 +24,7 @@ const NAV = [
   { group: "Try on", items: [
     { to: "/", label: "Home", icon: HomeIcon, exact: true },
     { to: "/live", label: "Live Rx Mirror", icon: Aperture },
+    { to: "/check", label: "Fit Check", icon: ShieldCheck },
     { to: "/scan", label: "Scan", icon: ScanFace },
     { to: "/rx", label: "Prescription", icon: Ruler },
     { to: "/profile", label: "Your face", icon: UserRound },
@@ -38,11 +40,12 @@ const NAV = [
 const MOBILE_TABS = [
   { to: "/", label: "Home", icon: HomeIcon, exact: true },
   { to: "/live", label: "Live", icon: Aperture },
-  { to: "/frames", label: "Frames", icon: Glasses },
+  { to: "/check", label: "Check", icon: ShieldCheck },
   { to: "/studio", label: "Studio", icon: Sparkles },
   { to: "/agent", label: "Ask", icon: MessageCircle },
 ];
 const TITLES = [
+  ["/check", "Fit Check", "Remake-risk prediction"],
   ["/live", "Live Rx Mirror", "Real-time prescription try-on"],
   ["/scan", "Scan", "Measure your face"],
   ["/rx", "Prescription", "Your lenses"],
@@ -54,8 +57,8 @@ const TITLES = [
   ["/retail", "For retailers", "Catalogue Rx audit"],
   ["/", "Refract", "Prescription-true try-on"],
 ];
-const EMBED_TABS = [["/live", "Live"], ["/studio", "Photo"], ["/rx", "My Rx"], ["/scan", "Scan"]];
-const ROUTES = { "/": Home, "/live": Live, "/scan": Scan, "/rx": Rx, "/profile": Profile, "/frames": Frames, "/studio": Studio, "/agent": Agent, "/bag": Bag, "/retail": Retail };
+const EMBED_TABS = [["/live", "Live"], ["/check", "Fit check"], ["/studio", "Photo"], ["/rx", "My Rx"], ["/scan", "Scan"]];
+const ROUTES = { "/": Home, "/live": Live, "/check": Check, "/scan": Scan, "/rx": Rx, "/profile": Profile, "/frames": Frames, "/studio": Studio, "/agent": Agent, "/bag": Bag, "/retail": Retail };
 
 export default function App() {
   const route = useRoute();

@@ -53,3 +53,11 @@ test("quality checks ask to move closer, turn and fix light", () => {
   assert.ok(ids(qualityChecks({ landmarks: face(), W, H, luma: { mean: 140, left: 100, right: 180 } })).includes("light"));
   assert.ok(ids(qualityChecks({ landmarks: null, W, H, luma: null })).includes("face"));
 });
+
+test("nose width at pad height comes from the iris-scaled photo", () => {
+  const lm = face();
+  lm[193] = { x: 633 / W, y: 330 / H, z: 0 };
+  lm[417] = { x: 703 / W, y: 330 / H, z: 0 };
+  const m = measureFace(lm, W, H);
+  assert.ok(Math.abs(m.noseWidthMm - 70 * (IRIS_MM / 60)) < 1e-6);
+});

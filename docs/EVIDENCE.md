@@ -1,0 +1,71 @@
+# Evidence behind Refract's remake-risk engine
+
+Sources gathered on 2026-11-02. Old or vendor figures are labelled; inferred values say so.
+
+## The problem: glasses fail after purchase
+- **7.6% of prescription eyewear jobs are redone every month** (Vision Council lab + ECP surveys, 2012); the industry range is 5–15%. [Eyecare Business, Dec 2012](https://eyecarebusiness.com/issues/2012/december/editor-s-letter/)
+- **Causes of redos:**
+  - warranty remakes 36% (of which failed AR + non-adapts 17%);
+  - Rx errors 30%;
+  - **measurement errors 13%**;
+  - finishing 6%; surfacing 5%; order 3%; input 1%.
+
+  Measurement redos are often logged as "non-adapts". [Eyecare Business, May 2012](https://eyecarebusiness.com/issues/2012/may/redos-remakes/)
+- **Lab cost per redo (2012–13):**
+
+  | Job | Lab cost per redo |
+  |---|---|
+  | Progressive | $63.87 |
+  | AR | $66.55 |
+  | Single vision | $16.82 |
+
+  A redone progressive takes **5.71 extra days**. [20/20 Magazine](https://www.2020mag.com/article/finding-the-balance-with-redos-remakes-and-warranties) A full remake costs **2–3× the lab charge** (lab blog). [iCare Labs](https://blog.icarelabs.com/blog/how-to-cut-remakes-in-half)
+- **Online eyewear returns:**
+  - commonly estimated at 15–20%;
+  - 22% for cross-border orders (Shopify 2024 via Fittingbox);
+  - fit is the leading reason (vendor sources). [Fittingbox](https://fittingbox.com/en/resources/blog/lower-returns-in-cross-border-sales-with-precise-pd)
+- **Progressive non-adaptation:** practitioners estimate 5–10%. [Optiboard](https://www.optiboard.com/forums/forum/optical-forums/general-optics-and-eyecare-discussion-forum/29176-non-adapts-of-progressives)
+
+## Who it affects
+- **Myopia:**
+  - 1.41B people (22.9%) in 2000;
+  - **4.76B (49.8%) by 2050, with 938M highly myopic** (Holden et al., *Ophthalmology* 2016;123:1036). [PubMed](https://pubmed.ncbi.nlm.nih.gov/26875007/)
+- **Presbyopia:** 1.8B people in 2015, 826M without adequate near correction (Fricke et al., *Ophthalmology* 2018).
+- **Low and flat nasal bridges are typical** across East Asian, Southeast Asian and African-descent faces. Frames are designed around European norms, and frames slide on wider, flatter bridges. [Clinical Optometry 2025 review](https://www.dovepress.com/african-facial-anthropometry-and-spectacle-frame-design-a-review-peer-reviewed-fulltext-article-OPTO)
+- **"Low-bridge" or "Asian fit" lines** now sell at Warby Parker, Zenni, EyeBuyDirect, Oakley and JINS.
+
+## Market and pricing anchors
+- **Global eyewear market:** about $160–220B (2025 estimates: GMI, Fortune BI, Ken Research).
+- **India:**
+  - ₹78,800 crore market in FY25, heading to ₹1,48,300 crore by FY30;
+  - 73% of the value is prescription glasses;
+  - Lenskart sold **27.2M pairs** in FY25 through 2,723 stores. [Kotak](https://www.kotaksecurities.com/news/market-news/lenskart-fy25-revenue-profit-analysis)
+- **What retailers pay today:**
+  - online try-on: Fittingbox Shopify app **$59–199 a month**;
+  - in-store 3D centration: ZEISS VISUFIT 1000 **about £28,000 (£566 a month over 60 months)**.
+
+## Prior art (why Refract is new online)
+- **Rendering refraction on the face:** a research prototype exists (Zhang, Guo, Laffont, Martin, Gross, "A Virtual Try-On System for Prescription Eyeglasses", *IEEE CG&A* 2017, offline video). [PDF](https://qianzhanginfo.github.io/assets/pubs/virtualtryon.pdf)
+- **In store:** Fittingbox Optical Fit Pro (iPad, Sept 2025) simulates lens thickness.
+- **Online:** none found. Perfect Corp's eyewear try-on offers only tint, density and reflection.
+- **Wearer's view of a lens:** optician tools only (Hoya HVC Viewer and Vision Simulator, Essilor Nautilus, Shamir), behind an optician login or a headset.
+- **Slip and pressure prediction from Rx lens weight, nose geometry and skin oiliness:** not found. Fit tools stop at geometry (Topology, Warby Parker patents).
+- **Per-order remake-risk score:** not found. Only single-factor tools exist (PD tools, lab thickness calculators such as Essilor Precal).
+- **Rx-aware MCP tools for AI shopping agents:** not found. Existing eyewear MCP servers are generic Shopify cart tools.
+
+## Physics and standards used
+- **Prentice's rule:** prism (Δ) = decentration (cm) × power (D).
+- **Transverse chromatic aberration:** TCA = prism ÷ Abbe number.
+  - Abbe numbers: CR-39 58; polycarbonate about 30; 1.60 about 42; 1.67 about 32; 1.74 about 33.
+  - At 5 Δ off-axis, polycarbonate spreads about 0.17 Δ of colour against 0.09 Δ for CR-39. [20/20 "Crossing Abbe Road"](https://www.2020mag.com/article/crossing-abbe-road)
+- **ANSI Z80.1:** unwanted horizontal prism ≤ 0.67 Δ.
+- **Spectacle magnification:** power factor 1/(1 − d·F), with d ≈ 12 mm vertex.
+
+## Our own experiment: can one photo measure the nose bridge?
+We ran MediaPipe Face Landmarker on four portraits (YouCam sample images), with iris-scaled millimetres.
+- **Depth-based bridge height came out at 15–16 mm for every face.** That's the model's canonical-face prior, not a measurement, so we don't use it.
+- **2D measurements were consistent and plausible:**
+  - inner-eye-corner gap 29.7–31.1 mm (typical adult);
+  - nose width at pad height 12.8–13.9 mm.
+
+Refract therefore measures nose width and face width from the photo, takes skin oiliness from YouCam Skin AI, and asks one question for bridge height ("do glasses rest on your cheeks?").

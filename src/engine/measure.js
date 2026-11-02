@@ -5,7 +5,7 @@ export const IRIS_SD = 0.043; // relative spread of iris width across adults
 export const CAMERA_HFOV = 60; // degrees, typical phone/laptop camera
 const ROTATION_CENTRE = 13.5; // mm behind the cornea
 
-const LM = { odCentre: 468, odRing: [469, 470, 471, 472], osCentre: 473, osRing: [474, 475, 476, 477], nasion: 168, noseTip: 1, chin: 152, top: 10, cheekL: 234, cheekR: 454, templeL: 127, templeR: 356 };
+const LM = { noseL: 193, noseR: 417, odCentre: 468, odRing: [469, 470, 471, 472], osCentre: 473, osRing: [474, 475, 476, 477], nasion: 168, noseTip: 1, chin: 152, top: 10, cheekL: 234, cheekR: 454, templeL: 127, templeR: 356 };
 
 const px = (lm, i, W, H) => ({ x: lm[i].x * W, y: lm[i].y * H });
 const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
@@ -39,6 +39,7 @@ export function measureFace(landmarks, W, H) {
     distanceMm,
     pd: { near, far: left + right, left, right, plusMinus: (left + right) * IRIS_SD },
     faceWidthMm: dist(P(LM.templeL), P(LM.templeR)) * mmPerPx,
+    noseWidthMm: dist(P(LM.noseL), P(LM.noseR)) * mmPerPx, // nasal sidewalls at nose-pad height
     eyeLine: { angleDeg: (Math.atan2(os.y - od.y, os.x - od.x) * 180) / Math.PI, od, os, nasion },
     faceBox,
   };

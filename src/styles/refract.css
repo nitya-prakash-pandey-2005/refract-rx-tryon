@@ -195,3 +195,15 @@ i.lg { display: inline-block; width: 12px; height: 12px; border-radius: 4px; ver
 @media (max-width: 1000px) { .hero { grid-template-columns: minmax(0, 1fr); } }
 .card-preview { width: 100%; border-radius: 16px; border: 1px solid var(--line); display: block; }
 .studio-stage { margin: 0 auto; }
+
+/* ---------- fit check ---------- */
+.risk-hero { display: grid; gap: 12px; align-content: start; }
+.risk-num { font-family: var(--font-display); font-size: 64px; font-weight: 700; letter-spacing: -0.04em; line-height: 1; }
+.risk-num small { font-size: 0.3em; color: var(--muted); margin-left: 4px; }
+.risk-num.low { color: var(--green); } .risk-num.medium { color: var(--amber); } .risk-num.high { color: var(--rose); }
+.risk-card { display: grid; gap: 8px; align-content: start; border-left: 3px solid var(--line-2); }
+.risk-card.low { border-left-color: var(--green); } .risk-card.medium { border-left-color: var(--amber); } .risk-card.high { border-left-color: var(--rose); }
+.sight-sim { width: 100%; height: auto; display: block; border-radius: var(--r); border: 1px solid var(--line); background: #0b0e1a; }
+.material-row { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; margin: 10px 0; }
+.slip-svg { width: 100%; height: auto; display: block; margin-bottom: 8px; color: var(--text-2); }
+.field .seg { width: 100%; }

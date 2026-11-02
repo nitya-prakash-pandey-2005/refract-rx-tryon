@@ -2,8 +2,9 @@
 // (from the published unit tables) and result normalisers.
 
 export const FACE_FEATURES = ["faceShape", "eyeShape", "eyeSize", "eyeDistance", "eyelid", "eyebrowShape", "eyeColor", "hairColor", "eyebrowColor"];
-export const SKIN_EYE_CONCERNS_HD = ["hd_dark_circle", "hd_eye_bag", "hd_wrinkle", "hd_droopy_upper_eyelid", "hd_droopy_lower_eyelid", "hd_tear_trough"];
-export const SKIN_EYE_CONCERNS_SD = ["dark_circle_v2", "eye_bag", "wrinkle", "droopy_upper_eyelid", "droopy_lower_eyelid", "tear_trough"];
+// Eye-area concerns (what a lens sits in front of) + oiliness (how well nose pads grip).
+export const SKIN_EYE_CONCERNS_HD = ["hd_dark_circle", "hd_eye_bag", "hd_wrinkle", "hd_droopy_upper_eyelid", "hd_droopy_lower_eyelid", "hd_tear_trough", "hd_oiliness"];
+export const SKIN_EYE_CONCERNS_SD = ["dark_circle_v2", "eye_bag", "wrinkle", "droopy_upper_eyelid", "droopy_lower_eyelid", "tear_trough", "oiliness"];
 export const HD_MIN_SHORT_SIDE = 1080;
 
 export const skinParams = (hd) => ({
@@ -53,7 +54,7 @@ export function normalizeFaceAttr(results) {
 
 const CONCERN = {
   dark_circle: "darkCircle", eye_bag: "eyeBag", droopy_upper_eyelid: "droopyUpper", droopy_lower_eyelid: "droopyLower",
-  tear_trough: "tearTrough", wrinkle: "wrinkle", pore: "pore", texture: "texture", acne: "acne", redness: "redness",
+  tear_trough: "tearTrough", wrinkle: "wrinkle", oiliness: "oiliness", pore: "pore", texture: "texture", acne: "acne", redness: "redness",
 };
 
 export function normalizeSkin(results) {

@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { normalizeFaceAttr, normalizeSkin, unitCost } from "../src/engine/youcam.js";
+import { normalizeFaceAttr, normalizeSkin, unitCost, skinParams } from "../src/engine/youcam.js";
 
 test("face attributes flatten into one profile", () => {
   const p = normalizeFaceAttr({
@@ -50,4 +50,11 @@ test("unit cost matches the published tiers", () => {
   assert.equal(unitCost("skin-analysis", { dst_actions: ["hd_eye_bag", "hd_dark_circle", "hd_wrinkle", "hd_droopy_upper_eyelid", "hd_droopy_lower_eyelid", "hd_tear_trough"] }), 16);
   assert.equal(unitCost("skin-analysis", { dst_actions: ["eye_bag", "dark_circle_v2", "wrinkle", "droopy_upper_eyelid", "droopy_lower_eyelid", "tear_trough"] }), 12);
   assert.equal(unitCost("makeup-vto", {}), 1);
+});
+
+test("skin analysis asks for oiliness (nose pad grip) at no extra unit tier", () => {
+  assert.ok(skinParams(true).dst_actions.includes("hd_oiliness"));
+  assert.ok(skinParams(false).dst_actions.includes("oiliness"));
+  assert.equal(unitCost("skin-analysis", skinParams(false)), 12);
+  assert.equal(normalizeSkin({ output: [{ type: "hd_oiliness", region: "whole", ui_score: 41 }] }).oiliness, 41);
 });
