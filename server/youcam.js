@@ -66,3 +66,11 @@ export async function credit() {
   const list = json.results || json.data?.results || [];
   return list.reduce((a, r) => a + Number(r.amount_dec ?? r.amount ?? 0), 0);
 }
+
+// YouCam result files can arrive as binary/octet-stream; trust the file's magic bytes instead.
+export function imageMime(buf, headerType) {
+  if (buf[0] === 0x89 && buf[1] === 0x50 && buf[2] === 0x4e && buf[3] === 0x47) return "image/png";
+  if (buf[0] === 0xff && buf[1] === 0xd8) return "image/jpeg";
+  if (buf.length >= 12 && buf.toString("ascii", 0, 4) === "RIFF" && buf.toString("ascii", 8, 12) === "WEBP") return "image/webp";
+  return /^image\//.test(headerType || "") ? headerType : "image/jpeg";
+}

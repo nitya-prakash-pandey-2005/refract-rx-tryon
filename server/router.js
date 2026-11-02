@@ -1,5 +1,5 @@
 // One handler for every /api route; used by the local dev server and the Vercel function.
-import { uploadImage, createTask, pollTask, credit, YouCamError } from "./youcam.js";
+import { uploadImage, createTask, pollTask, credit, imageMime, YouCamError } from "./youcam.js";
 import { unitCost } from "../src/engine/youcam.js";
 import { runAgent, llmProvider } from "./agent.js";
 import { allow, buildParams, budgetLeft, spend } from "./limits.js";
@@ -21,28 +21,53 @@ function decodeImage(dataUrl) {
   return { buf, mime: m[1] };
 }
 
-async function toDataUrl(url) {
-  const r = await fetch(url);
-  if (!r.ok) throw new YouCamError("Could not download the try-on result.", "ResultDownload", 502);
-  const type = r.headers.get("content-type") || "image/jpeg";
-  return `data:${type};base64,${Buffer.from(await r.arrayBuffer()).toString("base64")}`;
+// Result files live on S3; connections occasionally drop mid-download, so retry a few times.
+async function download(url, tries = 3) {
+  for (let i = 1; ; i++) {
+    try {
+      const r = await fetch(url);
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      return { buf: Buffer.from(await r.arrayBuffer()), type: r.headers.get("content-type") };
+    } catch (e) {
+      if (i >= tries) throw e;
+      await new Promise((res) => setTimeout(res, 600 * i));
+    }
+  }
 }
 
+async function toDataUrl(url) {
+  try {
+    const { buf, type } = await download(url);
+    return `data:${imageMime(buf, type)};base64,${buf.toString("base64")}`;
+  } catch {
+    throw new YouCamError("Could not download the try-on result.", "ResultDownload", 502);
+  }
+}
+
+// Recording for the sample profiles is best effort: it must never fail a paid YouCam call.
 async function record(feature, label, params, results) {
   if (process.env.RECORD !== "1") return;
-  const { writeFile, mkdir } = await import("node:fs/promises");
-  await mkdir("public/replay/img", { recursive: true });
-  const name = `${label || feature}-${feature}.json`.replace(/[^a-z0-9.\-]/gi, "_");
-  // Save mask overlays locally: YouCam result URLs expire after 2 hours.
-  for (const [i, o] of (results?.output || []).entries()) {
-    if (!o.mask_urls?.[0]) continue;
-    const r = await fetch(o.mask_urls[0]);
-    if (!r.ok) continue;
-    const file = `img/${label || feature}-${o.type}-${o.region || "whole"}-${i}.jpg`.replace(/[^a-z0-9.\-/]/gi, "_");
-    await writeFile(`public/replay/${file}`, Buffer.from(await r.arrayBuffer()));
-    o.mask_urls = [`/replay/${file}`];
+  try {
+    const { writeFile, mkdir } = await import("node:fs/promises");
+    await mkdir("public/replay/img", { recursive: true });
+    const name = `${label || feature}-${feature}.json`.replace(/[^a-z0-9.\-]/gi, "_");
+    const copy = structuredClone(results);
+    // Save mask overlays locally: YouCam result URLs expire after 2 hours.
+    for (const [i, o] of (copy?.output || []).entries()) {
+      if (!o.mask_urls?.[0]) continue;
+      try {
+        const { buf } = await download(o.mask_urls[0]);
+        const file = `img/${label || feature}-${o.type}-${o.region || "whole"}-${i}.jpg`.replace(/[^a-z0-9.\-/]/gi, "_");
+        await writeFile(`public/replay/${file}`, buf);
+        o.mask_urls = [`/replay/${file}`];
+      } catch (e) {
+        console.warn(`record: skipped mask ${o.type}: ${e.message}`);
+      }
+    }
+    await writeFile(`public/replay/${name}`, JSON.stringify({ feature, params, results: copy, recordedAt: new Date().toISOString() }, null, 2));
+  } catch (e) {
+    console.warn(`record: could not save ${feature}: ${e.message}`);
   }
-  await writeFile(`public/replay/${name}`, JSON.stringify({ feature, params, results, recordedAt: new Date().toISOString() }, null, 2));
 }
 
 const ipOf = (req) => String(req.headers?.["x-forwarded-for"] || "").split(",")[0].trim() || req.socket?.remoteAddress || "local";

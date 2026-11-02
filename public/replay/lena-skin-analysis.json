@@ -1,0 +1,93 @@
+{
+  "feature": "skin-analysis",
+  "params": {
+    "dst_actions": [
+      "dark_circle_v2",
+      "eye_bag",
+      "wrinkle",
+      "droopy_upper_eyelid",
+      "droopy_lower_eyelid",
+      "tear_trough"
+    ],
+    "format": "json",
+    "miniserver_args": {
+      "enable_mask_overlay": true
+    }
+  },
+  "results": {
+    "output": [
+      {
+        "ui_score": 84,
+        "mask_urls": [
+          "/replay/img/lena-tear_trough-whole-0.jpg"
+        ],
+        "raw_score": 88.20641711354256,
+        "type": "tear_trough",
+        "url": null
+      },
+      {
+        "ui_score": 74,
+        "mask_urls": [
+          "/replay/img/lena-eye_bag-whole-1.jpg"
+        ],
+        "raw_score": 65.93680381774902,
+        "type": "eye_bag",
+        "url": null
+      },
+      {
+        "ui_score": 80,
+        "mask_urls": [
+          "/replay/img/lena-droopy_lower_eyelid-whole-2.jpg"
+        ],
+        "raw_score": 79.41690683364868,
+        "type": "droopy_lower_eyelid",
+        "url": null
+      },
+      {
+        "ui_score": 82,
+        "mask_urls": [
+          "/replay/img/lena-droopy_upper_eyelid-whole-3.jpg"
+        ],
+        "raw_score": 83.02873373031616,
+        "type": "droopy_upper_eyelid",
+        "url": null
+      },
+      {
+        "ui_score": 94,
+        "mask_urls": [
+          "/replay/img/lena-wrinkle-whole-4.jpg"
+        ],
+        "raw_score": 97.15211391448975,
+        "type": "wrinkle",
+        "url": null
+      },
+      {
+        "ui_score": 77,
+        "mask_urls": [
+          "/replay/img/lena-dark_circle_v2-whole-5.jpg"
+        ],
+        "raw_score": 81.23174905776978,
+        "type": "dark_circle_v2",
+        "url": null
+      },
+      {
+        "score": 81.83333333333333,
+        "type": "all",
+        "url": null
+      },
+      {
+        "score": 24,
+        "type": "skin_age",
+        "url": null
+      },
+      {
+        "mask_urls": [
+          "/replay/img/lena-resize_image-whole-8.jpg"
+        ],
+        "type": "resize_image",
+        "url": null
+      }
+    ]
+  },
+  "recordedAt": "2026-11-02T02:15:44.509Z"
+}
