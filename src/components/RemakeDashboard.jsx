@@ -114,7 +114,7 @@ export default function RemakeDashboard() {
   "frameId": "juno", "pd": { "left": 31.5, "right": 31.5, "plusMinus": 2.7 },
   "face": { "faceWidthMm": 128, "noseWidthMm": 13.5, "bridge": "low" },
   "oiliness": 40 }      // from YouCam Skin AI
-→ { "score": 93, "level": "high", "parts": { look, sight, fit, measure }, "fixes": [ … ] }`}</pre>
+→ { "score": 89, "level": "high", "parts": { look, sight, fit, measure }, "fixes": [ … ] }`}</pre>
           <div className="row wrap" style={{ gap: 8 }}>
             <button className="btn primary sm" onClick={tryApi} disabled={api?.loading}>{api?.loading ? <Loader2 size={15} className="spin" /> : <Play size={15} />}Try the live API</button>
             <a className="btn sm ghost" href="/store/index.html">Embed demo store</a>
