@@ -193,3 +193,4 @@ i.lg { display: inline-block; width: 12px; height: 12px; border-radius: 4px; ver
 @media (prefers-reduced-motion: reduce) { [data-hero] { opacity: 1; } }
 @media (max-width: 1000px) { .hero { grid-template-columns: minmax(0, 1fr); } }
 .card-preview { width: 100%; border-radius: 16px; border: 1px solid var(--line); display: block; }
+.studio-stage { margin: 0 auto; }

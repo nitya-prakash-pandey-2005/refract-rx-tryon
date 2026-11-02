@@ -2,7 +2,9 @@
 
 **Every virtual try-on shows you frames without lenses. Refract shows what you'll actually look like through _your_ prescription.**
 
-Refract is a web app (it also installs as a phone app) for people who wear glasses. It scans your face, measures your PD from your iris, and shows frames on your own photo with your real lens optics: how much smaller or bigger your eyes look to others, the edge thickness, and the "cut-in" at the lens rim. It ranks frames and lens index for your Rx. It also uses **YouCam AI APIs** to retune your eye makeup for your lenses, because minus lenses shrink your eyes and plus lenses magnify every line and dark circle.
+Refract is a web app (it also installs as a phone app) for people who wear glasses. It renders you **live, through your exact prescription**: a GPU shader re-samples your camera through each lens every frame, so you see how much smaller or bigger your eyes look to others, the edge thickness, and the "cut-in" at the lens rim, with frames tracking your face. It ranks frames and lens index for your Rx, uses **YouCam AI APIs** to retune your eye makeup for your lenses, and drops into **any eyewear store with one script tag**.
+
+![Live Rx Mirror with Optics X-ray](docs/screenshots/03-live-optics-xray.png)
 
 Built for the *YouCam API Skin AI & eCommerce VTO Hackathon* (eCommerce VTO track: beauty and eyewear as one look).
 
@@ -18,6 +20,9 @@ Built for the *YouCam API Skin AI & eCommerce VTO Hackathon* (eCommerce VTO trac
 
 | Screen | What happens |
 |---|---|
+| **Live Rx Mirror** | Real-time try-on: MediaPipe face mesh + a **WebGL2 lens shader** that re-samples every pixel inside each lens from where its light really comes from (sphere, cylinder, axis, depth), at video frame rate. Frames track your face, PD is measured live, and **Showroom ↔ Your Rx** morphs between the lensless view and reality. **Optics X-ray** overlays a 2.5 mm grid bent by the lens and a rim heat-ring coloured by edge thickness. |
+| **Store embed** | `public/embed.js`: any store adds one script tag and `data-refract-sku` on a button. Refract opens in a modal with the live mirror; when the shopper picks a frame, the store receives a `refract:add-to-cart` event with frame, lens index and predicted edge thickness. Demo store: `/store/index.html`. |
+| **Share card** | A 1080×1350 image of your look through your lenses, with eye-size change, edge, weight and Rx-Fit, made on the device. |
 | **Scan** | Live MediaPipe face mesh with checks for distance, centring, head pose and light balance. **Voice guidance and auto-capture**: people who need glasses can't read the screen with them off. Upload is the fallback. |
 | **Prescription** | SPH/CYL/AXIS per eye. Shows the eye-size change and a true-scale lens cross-section right away. PD comes from the scan. |
 | **Your face** | **YouCam Face Analyzer** reads face shape, eye shape, size, setting, eyelid, brows and colours. **YouCam Skin Analysis** scores dark circles, eye bags, crow's feet, lid droop and tear trough. Refract computes what your lenses will magnify or hide in that area. **YouCam Makeup VTO** renders an Rx-tuned eye look and a generic look side by side. |
@@ -53,7 +58,7 @@ About 35–40 units per full profile. The app keeps a units ledger, and the face
 npm install
 cp .env.example .env        # add YOUCAM_API_KEY (and optionally ANTHROPIC_API_KEY)
 npm run dev                 # http://localhost:5190 (app + API on one port)
-npm test                    # 46 unit tests: optics, fit, PD, makeup rules, placement, normalisers, agent, limits
+npm test                    # 52 unit tests: optics, fit, PD, makeup rules, placement + shader uniforms, smoothing, normalisers, agent, limits
 npm run build               # production build in dist/
 ```
 
@@ -67,8 +72,9 @@ npm run build               # production build in dist/
 
 ```
 src/engine/     optics.js, frames.js, fit.js, measure.js, placement.js, makeup.js, youcam.js  (pure, tested)
-src/vision/     landmarker.js (MediaPipe), compose.js (lens compositor), image.js
-src/pages/      Home, Scan, Rx, Profile, Frames, Studio, Agent, Bag, Retail
+src/vision/     landmarker.js (MediaPipe), glwarp.js (WebGL2 lens shader), compose.js (lens compositor, X-ray), smooth.js, card.js, image.js
+public/         embed.js (store integration), store/ (demo store), replay/ (recorded YouCam responses)
+src/pages/      Home, Live, Scan, Rx, Profile, Frames, Studio, Agent, Bag, Retail
 server/         youcam.js (File API, task, poll), router.js, agent.js, dev.js
 api/index.js    Vercel entry
 tests/          node:test suites

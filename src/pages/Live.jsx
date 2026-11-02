@@ -97,8 +97,8 @@ export default function Live({ parts }) {
             warper.render(v, W, H, lensUniforms(place, L.rx, t), { od: place.lenses.od.poly, os: place.lenses.os.poly });
             const edge = Math.max(L.fit.lens.od.maxEdge, L.fit.lens.os.maxEdge);
             drawLensGloss(ctx, place, { edgeMm: edge, minus: L.fit.minus, t });
-            if (L.xray) drawXray(ctx, place, { lens: L.fit.lens, rx: L.rx, t, mirrored: L.mirror });
             drawFrame(ctx, place, L.frame);
+            if (L.xray) drawXray(ctx, place, { lens: L.fit.lens, rx: L.rx, t, mirrored: L.mirror });
           } else {
             warper.render(v, W, H, null, null);
           }

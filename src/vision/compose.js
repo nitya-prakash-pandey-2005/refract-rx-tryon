@@ -316,7 +316,8 @@ export function drawXray(ctx, place, { lens, rx, t = 1, mirrored = false }) {
       ctx.stroke();
     }
     const iMax = P.edges.reduce((m, e, i) => (e.t > P.edges[m].t ? i : m), 0);
-    const [lx, ly] = inset[iMax % inset.length];
+    const [ex, ey] = L.poly[iMax % L.poly.length];
+    const lx = L.oc.x + (ex - L.oc.x) * 0.8, ly = L.oc.y + (ey - L.oc.y) * 0.8; // label sits inside the lens, clear of the rim
     const label = `${P.edges[iMax].t.toFixed(1)} mm`;
     ctx.font = `600 ${Math.max(11, 3.2 * pxPerMm)}px "JetBrains Mono Variable", monospace`;
     const w = ctx.measureText(label).width + 10, h = Math.max(16, 4.6 * pxPerMm);
