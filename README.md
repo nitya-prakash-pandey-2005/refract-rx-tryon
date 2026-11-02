@@ -35,6 +35,7 @@ Built for the *YouCam API Skin AI & eCommerce VTO Hackathon* (eCommerce VTO trac
 | **Store embed** | `public/embed.js`: one script tag and `data-refract-sku` on a button. Refract opens in a modal; the store receives `refract:add-to-cart` with frame, lens index and predicted edge. Demo store: `/store/index.html`. |
 | **YouCam analysis** | **YouCam Face Analyzer** reads face shape and eyes. **YouCam Skin Analysis** scores oiliness (nose-pad grip) and the eye area a lens magnifies. **YouCam Makeup VTO** renders an Rx-tuned eye look next to a generic one. |
 | **Photo try-on** | Your photo, or a YouCam makeup render, re-sampled through each lens per pixel, with physically scaled frames and lens-index chips that say when a thinner lens isn't worth it. |
+| **Prescription** | SPH / CYL / AXIS per eye, with the eye-size change and a true-scale lens cross-section updating live, plus an interactive **how to read your prescription** guide (OD/OS, SPH, CYL, AXIS, ADD, PD) for first-timers. |
 | **Face scan** | Live face mesh with distance, centring, pose and light checks, **voice guidance and auto-capture** (you can't read the screen with your glasses off). PD from the iris. |
 | **Ask Refract** | An agent (Claude `claude-opus-5-5`, tool use) whose every number is a visible tool call to the same engine. Without a key, a built-in planner answers with the same tools. |
 | **Shortlist** | A lens report (frame, index, coatings, Rx, mono PD with tolerance, predicted edge) to take to any shop or optician, plus a shareable 1080×1350 card. |

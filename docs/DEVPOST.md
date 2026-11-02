@@ -76,6 +76,7 @@ What-if controls (lens material, nose bridge, oiliness, known PD) move the score
   - pricing at $49 / $199 / custom per store.
 
 **Also included:**
+- an interactive "how to read your prescription" guide (OD/OS, SPH, CYL, AXIS, ADD, PD);
 - a voice-guided face scan you can do without your glasses;
 - an agent (Claude with tool use) where every number is a visible tool call;
 - a shortlist with a lens report to take to any shop;
