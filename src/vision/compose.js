@@ -1,7 +1,7 @@
 // Prescription-true try-on compositor (Canvas 2D).
 // 1) draw the photo (or a YouCam makeup render), 2) re-sample each lens area through the
 // lens optics (warpSource), 3) add edge "power rings", glare and coating, 4) draw the frame.
-import { warpSource } from "../engine/placement";
+import { warpSource, EYE_DEPTH_M, DEPTH_GAIN } from "../engine/placement";
 
 export function prepareSource(image, W, H) {
   const canvas = document.createElement("canvas");
@@ -221,4 +221,113 @@ export function drawScene(ctx, { source, place, frame, rx, t, lens, showFrame = 
     lensEffects(ctx, L, { edgeMm: lens?.[side]?.maxEdge ?? 0, minus: lens?.minus, t, pxPerMm: place.pxPerMm });
   }
   if (showFrame) drawFrame(ctx, place, frame);
+}
+
+// Per-frame lens finish for live mode (no pixel reads): power rings near the rim of strong
+// minus lenses, a darker edge band for thickness, glare and a coating sheen.
+export function drawLensGloss(ctx, place, { edgeMm = 0, minus = false, t = 1 } = {}) {
+  const { pxPerMm } = place;
+  for (const L of [place.lenses.od, place.lenses.os]) {
+    const path = pathOf(L.poly);
+    const xs = L.poly.map((p) => p[0]), ys = L.poly.map((p) => p[1]);
+    const bx = Math.min(...xs), by = Math.min(...ys), bw = Math.max(...xs) - bx, bh = Math.max(...ys) - by;
+    ctx.save();
+    ctx.clip(path);
+    if (minus && edgeMm > 2.5 && t > 0.01) {
+      const n = Math.min(6, Math.round((edgeMm - 2) / 1.2));
+      const step = (0.9 * pxPerMm) / Math.max(1, Math.hypot(bw, bh) / 2);
+      ctx.lineWidth = Math.max(1, pxPerMm * 0.22);
+      for (let i = 1; i <= n; i++) {
+        ctx.strokeStyle = `rgba(255,255,255,${(0.16 - i * 0.02) * t})`;
+        ctx.stroke(scaledPath(L.poly, L.oc, 1 - i * step * (1 + edgeMm / 6)));
+      }
+      ctx.strokeStyle = `rgba(20,24,36,${0.22 * t})`;
+      ctx.lineWidth = Math.min(edgeMm, 9) * pxPerMm * 0.5;
+      ctx.stroke(path);
+    }
+    const g = ctx.createLinearGradient(bx, by, bx + bw, by + bh);
+    g.addColorStop(0, "rgba(255,255,255,0.16)");
+    g.addColorStop(0.32, "rgba(255,255,255,0.02)");
+    g.addColorStop(0.75, "rgba(255,255,255,0)");
+    g.addColorStop(1, "rgba(140,255,210,0.06)");
+    ctx.fillStyle = g;
+    ctx.fillRect(bx, by, bw, bh);
+    ctx.restore();
+  }
+}
+
+// ---------- Optics X-ray ----------
+const heat = (mm) => (mm <= 2.5 ? "#34d399" : mm <= 3.5 ? "#a3e635" : mm <= 4.5 ? "#fbbf24" : mm <= 6 ? "#fb923c" : "#fb7185");
+
+// Where a point on the face (q) appears through the lens: the forward map of warpSource.
+function forward(q, L, power, mmPerPx, t) {
+  const ax = L.axis.x, ay = L.axis.y;
+  const dx = q[0] - L.oc.x, dy = q[1] - L.oc.y;
+  const a = dx * ax + dy * ay, b = -dx * ay + dy * ax;
+  let px = q[0], py = q[1];
+  for (let k = 0; k < 2; k++) {
+    const d = EYE_DEPTH_M + DEPTH_GAIN * Math.hypot(px - L.oc.x, py - L.oc.y) * mmPerPx;
+    const ma = 1 / (1 - d * power.sph * t), mp = 1 / (1 - d * (power.sph + power.cyl) * t);
+    px = L.oc.x + a * ma * ax - b * mp * ay;
+    py = L.oc.y + a * ma * ay + b * mp * ax;
+  }
+  return [px, py];
+}
+
+// Distortion grid (2.5 mm on the face) bent through each lens, plus a heat ring of edge
+// thickness from the optics engine, labelled at the thickest point.
+export function drawXray(ctx, place, { lens, rx, t = 1, mirrored = false }) {
+  const { pxPerMm, mmPerPx, u, v } = place;
+  for (const side of ["od", "os"]) {
+    const L = place.lenses[side], P = lens?.[side];
+    const path = pathOf(L.poly);
+    ctx.save();
+    ctx.clip(path);
+    ctx.fillStyle = "rgba(5,8,20,0.18)";
+    ctx.fill(path);
+    ctx.strokeStyle = "rgba(34,211,238,0.6)";
+    ctx.lineWidth = Math.max(1, pxPerMm * 0.12);
+    const span = 34, step = Math.max(2.5, 9 / pxPerMm); // at least ~9 px between grid lines
+    for (const dir of [0, 1]) {
+      for (let s = -span; s <= span; s += step) {
+        ctx.beginPath();
+        for (let w = -span, i = 0; w <= span; w += 1, i++) {
+          const mx = dir ? s : w, my = dir ? w : s;
+          const q = [L.oc.x + (mx * u.x + my * v.x) * pxPerMm, L.oc.y + (mx * u.y + my * v.y) * pxPerMm];
+          const [px, py] = forward(q, L, rx[side], mmPerPx, t);
+          i ? ctx.lineTo(px, py) : ctx.moveTo(px, py);
+        }
+        ctx.stroke();
+      }
+    }
+    ctx.restore();
+    if (!P?.edges?.length) continue;
+    // Heat ring just inside the rim; contour order matches the lens polygon.
+    ctx.save();
+    ctx.lineWidth = 2.4 * pxPerMm;
+    ctx.lineCap = "round";
+    const inset = L.poly.map(([x, y]) => [L.oc.x + (x - L.oc.x) * 0.965, L.oc.y + (y - L.oc.y) * 0.965]);
+    for (let i = 0; i < inset.length; i++) {
+      const a = inset[i], b = inset[(i + 1) % inset.length];
+      ctx.strokeStyle = heat(P.edges[i % P.edges.length].t);
+      ctx.beginPath();
+      ctx.moveTo(a[0], a[1]);
+      ctx.lineTo(b[0], b[1]);
+      ctx.stroke();
+    }
+    const iMax = P.edges.reduce((m, e, i) => (e.t > P.edges[m].t ? i : m), 0);
+    const [lx, ly] = inset[iMax % inset.length];
+    const label = `${P.edges[iMax].t.toFixed(1)} mm`;
+    ctx.font = `600 ${Math.max(11, 3.2 * pxPerMm)}px "JetBrains Mono Variable", monospace`;
+    const w = ctx.measureText(label).width + 10, h = Math.max(16, 4.6 * pxPerMm);
+    ctx.translate(lx, ly);
+    if (mirrored) ctx.scale(-1, 1); // keep the label readable when the view is mirrored
+    ctx.fillStyle = "rgba(5,6,15,0.82)";
+    ctx.fillRect(-w / 2, -h / 2, w, h);
+    ctx.fillStyle = heat(P.edges[iMax].t);
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(label, 0, 0);
+    ctx.restore();
+  }
 }

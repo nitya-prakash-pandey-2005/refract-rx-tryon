@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Home as HomeIcon, ScanFace, Glasses, Sparkles, MessageCircle, Ruler, UserRound, ShoppingBag, Store, PlayCircle } from "lucide-react";
+import { Home as HomeIcon, ScanFace, Glasses, Sparkles, MessageCircle, Ruler, UserRound, ShoppingBag, Store, PlayCircle, Aperture } from "lucide-react";
 import { useRoute } from "./lib/router";
 import AppShell from "./shell/AppShell";
 import Tour from "./tour/Tour";
@@ -8,6 +8,7 @@ import { Toasts } from "./ui";
 import { useStore } from "./state/store";
 import "./tour/steps";
 import Home from "./pages/Home";
+import Live from "./pages/Live";
 import Scan from "./pages/Scan";
 import Rx from "./pages/Rx";
 import Profile from "./pages/Profile";
@@ -20,6 +21,7 @@ import Retail from "./pages/Retail";
 const NAV = [
   { group: "Try on", items: [
     { to: "/", label: "Home", icon: HomeIcon, exact: true },
+    { to: "/live", label: "Live Rx Mirror", icon: Aperture },
     { to: "/scan", label: "Scan", icon: ScanFace },
     { to: "/rx", label: "Prescription", icon: Ruler },
     { to: "/profile", label: "Your face", icon: UserRound },
@@ -34,12 +36,13 @@ const NAV = [
 ];
 const MOBILE_TABS = [
   { to: "/", label: "Home", icon: HomeIcon, exact: true },
-  { to: "/scan", label: "Scan", icon: ScanFace },
+  { to: "/live", label: "Live", icon: Aperture },
   { to: "/frames", label: "Frames", icon: Glasses },
   { to: "/studio", label: "Studio", icon: Sparkles },
   { to: "/agent", label: "Ask", icon: MessageCircle },
 ];
 const TITLES = [
+  ["/live", "Live Rx Mirror", "Real-time prescription try-on"],
   ["/scan", "Scan", "Measure your face"],
   ["/rx", "Prescription", "Your lenses"],
   ["/profile", "Your face", "Measured by YouCam"],
@@ -50,7 +53,7 @@ const TITLES = [
   ["/retail", "For retailers", "Catalogue Rx audit"],
   ["/", "Refract", "Prescription-true try-on"],
 ];
-const ROUTES = { "/": Home, "/scan": Scan, "/rx": Rx, "/profile": Profile, "/frames": Frames, "/studio": Studio, "/agent": Agent, "/bag": Bag, "/retail": Retail };
+const ROUTES = { "/": Home, "/live": Live, "/scan": Scan, "/rx": Rx, "/profile": Profile, "/frames": Frames, "/studio": Studio, "/agent": Agent, "/bag": Bag, "/retail": Retail };
 
 export default function App() {
   const route = useRoute();

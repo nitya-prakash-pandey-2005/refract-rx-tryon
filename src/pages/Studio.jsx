@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Sparkles, ShoppingBag, MessageCircle, ScanEye, Weight, Ruler, Eye } from "lucide-react";
-import { Card, PageHead, Hud, Badge, Seg, Drivers, toast } from "../ui";
+import { Card, PageHead, Hud, Badge, Seg, Drivers, Toggle, toast } from "../ui";
 import { useStore, setStore } from "../state/store";
 import { navigate } from "../lib/router";
 import { tween } from "../lib/anim";
@@ -9,7 +9,7 @@ import { rankFrames, lensPair } from "../engine/fit";
 import { INDICES, meridianPower } from "../engine/optics";
 import { placeFrame } from "../engine/placement";
 import { planLook } from "../engine/makeup";
-import { prepareSource, drawScene } from "../vision/compose";
+import { prepareSource, drawScene, drawXray } from "../vision/compose";
 import { loadImage } from "../vision/image";
 import NeedPhoto from "../components/NeedPhoto";
 import FrameArt from "../components/FrameArt";
@@ -32,6 +32,7 @@ function StudioInner({ s, frameId }) {
   const [source, setSource] = useState(null);
   const [mode, setMode] = useState("rx");
   const [zoom, setZoom] = useState("face");
+  const [xray, setXray] = useState(false);
   const [t, setT] = useState(0);
   const pd = { left: s.measure.pd.left, right: s.measure.pd.right };
   const ranked = useMemo(
@@ -60,11 +61,15 @@ function StudioInner({ s, frameId }) {
     const c = canvas.current;
     if (!c || !source) return;
     if (c.width !== s.photo.w) { c.width = s.photo.w; c.height = s.photo.h; }
-    drawScene(c.getContext("2d", { willReadFrequently: true }), { source, place, frame, rx: s.rx, t: tRef.current, lens: { od: lens.od, os: lens.os, minus: fit.minus } });
+    const ctx = c.getContext("2d", { willReadFrequently: true });
+    drawScene(ctx, { source, place, frame, rx: s.rx, t: tRef.current, lens: { od: lens.od, os: lens.os, minus: fit.minus } });
+    if (xrayRef.current) drawXray(ctx, place, { lens, rx: s.rx, t: tRef.current });
   };
+  const xrayRef = useRef(false);
+  xrayRef.current = xray;
   const renderRef = useRef(render);
   renderRef.current = render; // the morph always draws with the latest frame, index and look
-  useEffect(render, [source, place, lens]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(render, [source, place, lens, xray]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => () => anim.current?.pause?.(), []);
 
   // Showroom (t=0, lensless) ↔ Your Rx (t=1). Plays once on arrival.
@@ -121,6 +126,8 @@ function StudioInner({ s, frameId }) {
               <Seg options={[{ value: "showroom", label: "Showroom" }, { value: "rx", label: "Your Rx" }]} value={mode} onChange={setMode} />
               <Seg options={[{ value: "bare", label: "Bare" }, { value: "generic", label: "Generic look" }, { value: "rx", label: "Rx-tuned look" }].filter((o) => looks[o.value])} value={look} onChange={setLook} />
               <Seg options={[{ value: "face", label: "Face" }, { value: "eyes", label: "Eyes" }]} value={zoom} onChange={setZoom} />
+              <label className="row small" style={{ gap: 8 }}><Toggle on={xray} onChange={setXray} label="Optics X-ray" />Optics X-ray</label>
+              <a className="btn sm ghost" href={`#/live/${frame.id}`}>Go live</a>
             </div>
           </Card>
           <Card title="Frames ranked for your prescription" icon={ScanEye} right={<Hud>tap to try</Hud>} tour="frame-strip">
