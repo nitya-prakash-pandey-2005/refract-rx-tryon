@@ -61,7 +61,7 @@ const TITLES = [
   ["/retail", "For stores", "Remake-risk SaaS · API · MCP"],
   ["/", "Refract", "A free second opinion for any glasses"],
 ];
-const EMBED_TABS = [["/live", "Live"], ["/check", "Fit check"], ["/studio", "Photo"], ["/rx", "My Rx"], ["/scan", "Scan"]];
+const EMBED_TABS = [["/live", "Live"], ["/check", "Check"], ["/studio", "Photo"], ["/rx", "My Rx"], ["/scan", "Scan"]];
 const ROUTES = { "/": Home, "/live": Live, "/check": Check, "/scan": Scan, "/rx": Rx, "/profile": Profile, "/frames": Frames, "/studio": Studio, "/agent": Agent, "/bag": Bag, "/retail": Retail };
 
 export default function App() {

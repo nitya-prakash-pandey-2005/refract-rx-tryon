@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { parseDiopter, RANGES } from "../engine/rxinput";
-import { ArrowRight, Eye, Info } from "lucide-react";
+import { ArrowRight, Eye, Info, BookOpen } from "lucide-react";
 import { Card, PageHead, Hud, Badge } from "../ui";
 import { useStore, setStore } from "../state/store";
 import { navigate } from "../lib/router";
 import { useReveal } from "../lib/anim";
 import { spherEq, eyeMagnification, INDICES } from "../engine/optics";
 import LensSection from "../components/LensSection";
+import RxGuide from "../components/RxGuide";
 
 const PRESETS = [
   { label: "−2.50 everyday", rx: { od: { sph: -2.5, cyl: 0, axis: 0 }, os: { sph: -2.25, cyl: -0.25, axis: 180 } } },
@@ -95,6 +96,9 @@ export default function Rx() {
           </button>
           <p className="tiny muted row" style={{ gap: 6 }}><Info size={13} />Cosmetic preview only. Your optician confirms the final lens.</p>
         </div>
+        <Card className="span-12" title="How to read your prescription" icon={BookOpen} right={<Hud>tap a column</Hud>} data-reveal>
+          <RxGuide onUse={(r) => setStore({ rx: r, rxConfirmed: true })} />
+        </Card>
       </div>
     </div>
   );

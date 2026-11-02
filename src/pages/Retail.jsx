@@ -48,7 +48,7 @@ export default function Retail() {
 
   return (
     <div className="stack-lg" ref={root}>
-      <PageHead kicker="Refract for retailers · SaaS" title="Predict remakes before checkout" sub="7.6% of prescription glasses get redone. Refract scores every order for the four ways glasses fail, and fixes them while the shopper is still on your site." right={<Seg options={INDICES.filter((i) => i.n >= 1.6).map((i) => ({ value: i.n, label: i.n.toFixed(2) }))} value={n} onChange={setN} />} />
+      <PageHead kicker="Refract for stores · SaaS" title="Predict remakes before checkout" sub="7.6% of prescription glasses get redone. Refract scores every order for the four ways glasses fail, and fixes them while the shopper is still on your site." right={<Seg options={INDICES.filter((i) => i.n >= 1.6).map((i) => ({ value: i.n, label: i.n.toFixed(2) }))} value={n} onChange={setN} />} />
       <RemakeDashboard />
       <div className="section-head" data-reveal><Hud tone="cyan">Catalogue Rx audit</Hud><h2>Which of your frames still look good with strong lenses?</h2></div>
       <div className="grid g4 keep-2" data-reveal>

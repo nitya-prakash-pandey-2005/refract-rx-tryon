@@ -61,8 +61,8 @@ export default function Home() {
     const split = splitText(title.current, { words: true });
     const a = animate(split.words, { opacity: [0, 1], translateY: ["0.7em", 0], rotate: ["4deg", 0], duration: 800, delay: stagger(55), ease: "outExpo" });
     const b = animate(".hero-copy [data-hero]", { opacity: [0, 1], translateY: [16, 0], duration: 700, delay: stagger(90, { start: 450 }), ease: "outExpo" });
-    const c = kicker.current && scrambleText(kicker.current, { duration: 900, delay: 200 });
-    return () => { a.revert(); b.revert(); c?.revert?.(); split.revert?.(); };
+    const c = kicker.current && animate(kicker.current, { innerHTML: scrambleText({ chars: "uppercase", duration: 1100 }), delay: 250 });
+    return () => { a.revert(); b.revert(); c?.revert(); split.revert?.(); };
   }, []);
 
   useEffect(() => onView(stats.current, () => {
