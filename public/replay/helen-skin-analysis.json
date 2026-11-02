@@ -7,7 +7,8 @@
       "hd_wrinkle",
       "hd_droopy_upper_eyelid",
       "hd_droopy_lower_eyelid",
-      "hd_tear_trough"
+      "hd_tear_trough",
+      "hd_oiliness"
     ],
     "format": "json",
     "miniserver_args": {
@@ -17,12 +18,12 @@
   "results": {
     "output": [
       {
-        "ui_score": 70,
+        "ui_score": 81,
         "mask_urls": [
-          "/replay/img/helen-hd_tear_trough-whole-0.jpg"
+          "/replay/img/helen-hd_droopy_upper_eyelid-whole-0.jpg"
         ],
-        "raw_score": 56.06958270072937,
-        "type": "hd_tear_trough",
+        "raw_score": 80.70435523986816,
+        "type": "hd_droopy_upper_eyelid",
         "url": null
       },
       {
@@ -35,12 +36,12 @@
         "url": null
       },
       {
-        "ui_score": 81,
+        "ui_score": 70,
         "mask_urls": [
-          "/replay/img/helen-hd_droopy_upper_eyelid-whole-2.jpg"
+          "/replay/img/helen-hd_tear_trough-whole-2.jpg"
         ],
-        "raw_score": 80.70435523986816,
-        "type": "hd_droopy_upper_eyelid",
+        "raw_score": 56.06958270072937,
+        "type": "hd_tear_trough",
         "url": null
       },
       {
@@ -53,9 +54,18 @@
         "url": null
       },
       {
+        "ui_score": 66,
+        "mask_urls": [
+          "/replay/img/helen-hd_oiliness-whole-4.jpg"
+        ],
+        "raw_score": 46.5671501159668,
+        "type": "hd_oiliness",
+        "url": null
+      },
+      {
         "ui_score": 72,
         "mask_urls": [
-          "/replay/img/helen-hd_dark_circle-whole-4.jpg"
+          "/replay/img/helen-hd_dark_circle-whole-5.jpg"
         ],
         "raw_score": 68.23281645774841,
         "type": "hd_dark_circle",
@@ -64,7 +74,7 @@
       {
         "ui_score": 74,
         "mask_urls": [
-          "/replay/img/helen-hd_wrinkle-forehead-5.jpg"
+          "/replay/img/helen-hd_wrinkle-forehead-6.jpg"
         ],
         "raw_score": 74.44649934768677,
         "type": "hd_wrinkle",
@@ -74,7 +84,7 @@
       {
         "ui_score": 58,
         "mask_urls": [
-          "/replay/img/helen-hd_wrinkle-glabellar-6.jpg"
+          "/replay/img/helen-hd_wrinkle-glabellar-7.jpg"
         ],
         "raw_score": 31.281919479370117,
         "type": "hd_wrinkle",
@@ -84,7 +94,7 @@
       {
         "ui_score": 79,
         "mask_urls": [
-          "/replay/img/helen-hd_wrinkle-crowfeet-7.jpg"
+          "/replay/img/helen-hd_wrinkle-crowfeet-8.jpg"
         ],
         "raw_score": 87.7928626537323,
         "type": "hd_wrinkle",
@@ -94,7 +104,7 @@
       {
         "ui_score": 76,
         "mask_urls": [
-          "/replay/img/helen-hd_wrinkle-periocular-8.jpg"
+          "/replay/img/helen-hd_wrinkle-periocular-9.jpg"
         ],
         "raw_score": 80.59742212295532,
         "type": "hd_wrinkle",
@@ -104,7 +114,7 @@
       {
         "ui_score": 75,
         "mask_urls": [
-          "/replay/img/helen-hd_wrinkle-nasolabial-9.jpg"
+          "/replay/img/helen-hd_wrinkle-nasolabial-10.jpg"
         ],
         "raw_score": 76.23612403869629,
         "type": "hd_wrinkle",
@@ -114,7 +124,7 @@
       {
         "ui_score": 74,
         "mask_urls": [
-          "/replay/img/helen-hd_wrinkle-marionette-10.jpg"
+          "/replay/img/helen-hd_wrinkle-marionette-11.jpg"
         ],
         "raw_score": 74.0291976928711,
         "type": "hd_wrinkle",
@@ -124,7 +134,7 @@
       {
         "ui_score": 63,
         "mask_urls": [
-          "/replay/img/helen-hd_wrinkle-whole-11.jpg"
+          "/replay/img/helen-hd_wrinkle-whole-12.jpg"
         ],
         "raw_score": 44.11250114440918,
         "type": "hd_wrinkle",
@@ -132,7 +142,7 @@
         "url": null
       },
       {
-        "score": 67.66666666666667,
+        "score": 67.42857142857143,
         "type": "all",
         "url": null
       },
@@ -143,12 +153,12 @@
       },
       {
         "mask_urls": [
-          "/replay/img/helen-resize_image-whole-14.jpg"
+          "/replay/img/helen-resize_image-whole-15.jpg"
         ],
         "type": "resize_image",
         "url": null
       }
     ]
   },
-  "recordedAt": "2026-11-02T02:23:30.403Z"
+  "recordedAt": "2026-11-02T07:11:15.911Z"
 }

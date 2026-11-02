@@ -1,6 +1,6 @@
-# Refract: prescription-true try-on
+# Refract: know your glasses will work, before you buy them
 
-**Every virtual try-on shows you frames without lenses. Refract shows what you'll actually look like through _your_ prescription.**
+**7.6% of prescription glasses are redone and 15–22% of eyewear bought online comes back. Refract predicts whether a pair will fail (thick edges, colour fringes, sliding off your nose, wrong PD) before checkout, and shows you live, through _your_ real lenses.**
 
 Refract is a web app (it also installs as a phone app) for people who wear glasses. It renders you **live, through your exact prescription**: a GPU shader re-samples your camera through each lens every frame, so you see how much smaller or bigger your eyes look to others, the edge thickness, and the "cut-in" at the lens rim, with frames tracking your face. It ranks frames and lens index for your Rx, uses **YouCam AI APIs** to retune your eye makeup for your lenses, and drops into **any eyewear store with one script tag**.
 
@@ -20,6 +20,8 @@ Built for the *YouCam API Skin AI & eCommerce VTO Hackathon* (eCommerce VTO trac
 
 | Screen | What happens |
 |---|---|
+| **Fit Check (remake risk)** | Four models, each explained with a fix. **Look:** lens thickness + eye-size change. **Sight:** colour fringes by material, from Prentice's rule + Abbe, calibrated to Winter et al. 2015, shown as chart lines of sharpness lost, with a live **Sight simulator**. **Fit:** slip physics from frame + Rx lens weight, head movement, pad friction (silicone 0.61, hard about 0.45; oily skin cuts grip by 15% vs 40%), **oiliness from YouCam Skin Analysis**, nose width from the photo, temple clamp, plus nose-pressure marks above capillary pressure. **Measure:** PD-induced prism vs ANSI Z80.1 0.67 Δ. What-if controls move the score live. |
+| **Platform** | `POST /api/v1/risk` (one frame or rank the catalogue), `GET /api/v1/frames`, an **MCP server** (`npm run mcp`) with `rank_frames`, `remake_risk`, `lens_report` and `sight_by_material` for AI shopping agents, and a retailer dashboard (simulated order stream in a Web Worker, ROI calculator, pricing). |
 | **Live Rx Mirror** | Real-time try-on: MediaPipe face mesh + a **WebGL2 lens shader** that re-samples every pixel inside each lens from where its light really comes from (sphere, cylinder, axis, depth), at video frame rate. Frames track your face, PD is measured live, and **Showroom ↔ Your Rx** morphs between the lensless view and reality. **Optics X-ray** overlays a 2.5 mm grid bent by the lens and a rim heat-ring coloured by edge thickness. |
 | **Store embed** | `public/embed.js`: any store adds one script tag and `data-refract-sku` on a button. Refract opens in a modal with the live mirror; when the shopper picks a frame, the store receives a `refract:add-to-cart` event with frame, lens index and predicted edge thickness. Demo store: `/store/index.html`. |
 | **Share card** | A 1080×1350 image of your look through your lenses, with eye-size change, edge, weight and Rx-Fit, made on the device. |
@@ -58,7 +60,8 @@ About 35–40 units per full profile. The app keeps a units ledger, and the face
 npm install
 cp .env.example .env        # add YOUCAM_API_KEY (and optionally ANTHROPIC_API_KEY)
 npm run dev                 # http://localhost:5190 (app + API on one port)
-npm test                    # 52 unit tests: optics, fit, PD, makeup rules, placement + shader uniforms, smoothing, normalisers, agent, limits
+npm test                    # 74 tests: optics, sight, slip physics, remake risk, PD, makeup, placement, smoothing, API routes, MCP (real client), agent, limits
+npm run mcp                 # MCP server over stdio for Claude / ChatGPT / any MCP client
 npm run build               # production build in dist/
 ```
 
@@ -71,10 +74,11 @@ npm run build               # production build in dist/
 ## Project layout
 
 ```
-src/engine/     optics.js, frames.js, fit.js, measure.js, placement.js, makeup.js, youcam.js  (pure, tested)
+src/engine/     optics.js, sight.js, risk.js, simulate.js, frames.js, fit.js, measure.js, placement.js, makeup.js, youcam.js  (pure, tested)
+server/mcp.js   MCP server for AI shopping agents
 src/vision/     landmarker.js (MediaPipe), glwarp.js (WebGL2 lens shader), compose.js (lens compositor, X-ray), smooth.js, card.js, image.js
 public/         embed.js (store integration), store/ (demo store), replay/ (recorded YouCam responses)
-src/pages/      Home, Live, Scan, Rx, Profile, Frames, Studio, Agent, Bag, Retail
+src/pages/      Home, Check, Live, Scan, Rx, Profile, Frames, Studio, Agent, Bag, Retail
 server/         youcam.js (File API, task, poll), router.js, agent.js, dev.js
 api/index.js    Vercel entry
 tests/          node:test suites
@@ -86,6 +90,10 @@ tests/          node:test suites
 - Frames are drawn by Refract's renderer at real scale. YouCam's eyewear try-on and glasses removal are enterprise products, not part of the self-serve API, so Refract spends the YouCam API where it adds the most: face, skin and makeup.
 - Iris-based PD has about ±4% uncertainty (shown in the app); for strong prescriptions the app suggests confirming with an optician.
 - The lens model is thin-lens and spherical-surface; real aspheric designs come out somewhat thinner.
+
+## Evidence
+
+Sources, numbers and our own measurement experiment are in [docs/EVIDENCE.md](docs/EVIDENCE.md).
 
 ## Credits
 

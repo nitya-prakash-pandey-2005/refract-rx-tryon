@@ -1,23 +1,21 @@
 # Demo video script (target 2:50, hard limit 3:00)
 
-**Record:** Chrome at 1440 px, your own face on the webcam, plus 10–15 s of the phone (installed PWA or mobile Chrome) for the "on device" rule. No music, or royalty-free only. Name each YouCam API on screen when it appears.
+**Record:** Chrome at 1440 px, your own face on the webcam, plus 10 s on the phone for the "on device" rule. No music, or royalty-free only. Name each YouCam API on screen when it appears.
 
 **Before recording:**
 - Set your real prescription on **Prescription**. If you don't wear glasses, use the "−6.50 strong" preset and say so.
-- Run **Your face → Run YouCam analysis** once on your own scan (about 35 units).
-- Empty the bag and close other tabs.
+- Run **Your face → Run YouCam analysis** on your own scan (about 34 units), so oiliness feeds the Fit Check.
 
 | Time | Screen | Say |
 |---|---|---|
-| 0:00–0:15 | Home: the hero engine cycles Showroom → −9 Rx → X-ray → best frame | "Every virtual try-on shows you frames without lenses. But glasses change your face: strong lenses shrink your eyes, cut in at the edge and get thick in big frames. This is Refract: try-on through your real prescription." |
-| 0:15–0:45 | **Live Rx Mirror**: start the camera, move your head, toggle **Showroom / Your Rx** twice, switch to a big frame and then to a small one in the strip | "This is me, live. Every pixel inside the lens is re-rendered on the GPU from where its light really comes from: my sphere, cylinder and axis. Showroom… and my real prescription. My eyes are 10% smaller, and that big frame has an 11 mm edge. Refract ranks the frames for my prescription, and this one keeps the lens thin." |
-| 0:45–1:00 | Toggle **Optics X-ray** | "Optics X-ray: a 2.5 mm grid on my face bent by the lens, and the rim coloured by edge thickness. My PD is measured live from my iris." |
-| 1:00–1:35 | **Your face** page with your own YouCam results; the before/after slider | "Then the beauty layer, with three YouCam APIs. **AI Face Analyzer** reads my face shape, eyes and brows. **AI Skin Analysis** scores the area my lenses sit in front of: dark circles, eye bags, crow's feet. And **AI Makeup VTO** renders a generic look next to one retuned for my lens power. Behind minus lenses, brighter lids and lifted lashes, so my eyes don't disappear." |
-| 1:35–1:55 | **Studio**: Rx-tuned look through the lenses, tap the index chips, read the note, click **Share my Refract card** | "The Studio shows that look through my lenses and picks the lens index, honestly: here a thinner lens saves almost nothing, so Refract says don't pay for it. And I get a card to share." |
-| 1:55–2:25 | **Demo store**: `/store/index.html` → "Try with my Rx" → modal live mirror → "Add to store cart" → the store's cart updates | "And it drops into any store with one script tag. This is a demo shop: one button opens Refract with my real prescription, and when I choose, the store gets the frame, lens index and edge thickness straight into its cart." |
-| 2:25–2:40 | **Ask Refract**: tap "I love big oversized frames…", show the tool trace | "Shoppers can ask the agent. Every number it gives comes from a visible tool call to the optics engine." |
-| 2:40–2:55 | Phone shot of the Live mirror, then **For retailers** matrix | "It works on phones too. And retailers see which frames still look good with strong prescriptions. Refract: see yourself through your real lenses before you buy." |
+| 0:00–0:15 | Home hero (engine demo running) | "7.6% of prescription glasses get remade, and up to one in five bought online come back. Thick edges, rainbow fringes, frames sliding down your nose, a wrong PD. And every virtual try-on shows frames without lenses. Refract predicts whether your glasses will fail, before you buy them." |
+| 0:15–0:55 | **Fit Check** on a big frame (Juno): score, four cards; switch the material Thinnest → 1.60; bridge → "Yes · low"; toggle "I know my PD"; watch the score move | "Four models, each grounded in physics or a standard. **Look:** an 8 mm edge, eyes 9% smaller. **Sight:** 1.74 is thin, but its colour split costs me a full chart line of sharpness when I glance sideways. 1.60 keeps a wider clean zone. **Fit:** these slide. My lenses weigh 27 grams, the acetate bridge is hard, and **YouCam Skin Analysis** measured my oiliness, which cuts pad grip. **Measure:** a selfie PD at −7 means 2 prism dioptres, three times the ANSI tolerance. Every risk comes with a fix." |
+| 0:55–1:10 | Sight simulator: tap 1.74 → 1.50 | "This is what I'd actually see through each lens: fringes and the colour-clean zone, from Prentice's rule and measured perception data." |
+| 1:10–1:40 | **Live Rx Mirror**: start the camera, Showroom ↔ Your Rx, switch to the low-risk frame, Optics X-ray on | "Then see it live. My camera is re-rendered on the GPU through my exact lenses: eyes shrinking, the edge cutting in, frames tracking my face. Optics X-ray bends a grid through the lens and colours the rim by thickness." |
+| 1:40–2:05 | **Your face**: YouCam results + the Generic vs Rx-tuned look slider | "The beauty layer runs on three YouCam APIs. **Face Analyzer** reads my eyes and face shape. **Skin Analysis** scores the eye area my lenses magnify, plus oiliness. **Makeup VTO** renders a look retuned for my lens power." |
+| 2:05–2:30 | Demo store → "Try with my Rx" → modal → Add to store cart | "For retailers it's one script tag. A shopper tries frames with their real prescription, and the store's cart receives the frame, the lens and the predicted edge." |
+| 2:30–2:50 | **For retailers** dashboard: order-risk bars, ROI, pricing, "Try the live API", MCP card | "Retailers see which orders will fail and why, and what fixing them saves. The same engine is a REST API and an MCP server, so AI shopping agents can ask prescription-aware questions. Refract: know your glasses will work before you buy them." |
 
-**On-screen captions:** "WebGL lens shader", "YouCam AI Face Analyzer", "YouCam AI Skin Analysis", "YouCam AI Makeup VTO", "One-line store embed".
+**On-screen captions:** "YouCam AI Skin Analysis: oiliness → nose-pad grip", "YouCam AI Face Analyzer", "YouCam AI Makeup VTO", "WebGL lens shader", "REST API · MCP".
 
-**YouTube:** title "Refract: try on glasses through your real prescription (YouCam API hackathon)", visibility **Public**. Paste the link into Devpost.
+**YouTube:** "Refract: predict if your glasses will fail before you buy (YouCam API hackathon)", visibility **Public**.

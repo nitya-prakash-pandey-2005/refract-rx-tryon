@@ -1,117 +1,112 @@
-# Refract: prescription-true try-on
+# Refract: know your glasses will work, before you buy them
 
-**Tagline (≤ 200 chars):** Every virtual try-on shows frames without lenses. Refract renders you live through your real prescription, picks the frame and lens, retunes your eye makeup with YouCam AI, and drops into any store.
+**Tagline (≤ 200 chars):** Refract predicts if prescription glasses will fail (thick edges, colour fringes, sliding off your nose, wrong PD) before checkout, and shows you live through your real lenses. Built on YouCam AI.
 
 **Track:** eCommerce VTO
-**Links:** Code: https://github.com/nitya-prakash-pandey-2005/refract-rx-tryon · Demo store: `/store/index.html` on the live site
+**Code:** https://github.com/nitya-prakash-pandey-2005/refract-rx-tryon
 
 ---
 
 ## Inspiration
 
-Glasses are the one fashion item that changes your face. A −7 lens makes your eyes look about 9% smaller to everyone else and pulls in the edge of your face. Strong lenses get thick in big frames. Your eyeliner vanishes behind the glass, and a +3 lens magnifies every fine line and dark circle.
+**7.6% of prescription glasses are redone, and about 1 in 8 redos is a measurement error** (Vision Council lab and practice surveys). **15–22% of eyewear bought online comes back** (industry estimates). By 2050, **4.76 billion people will be shortsighted, 938 million of them highly** (Holden et al., *Ophthalmology* 2016). Those are the people with heavy, thick, distorting lenses.
 
-Yet every virtual try-on renders frames **with no lenses**. And if you're strongly shortsighted you can't even see the frames you try on in a store. About 2.2 billion people live with a vision impairment (WHO), and half the world is projected to be shortsighted by 2050. They all shop for glasses blind to the one thing that changes their look most.
+Glasses fail in four ways nobody checks before you buy:
+- **Look:** the lens edge is thick and your eyes look 8–10% smaller.
+- **Sight:** a cheap high-index lens shows rainbow fringes when you glance sideways.
+- **Fit:** heavy lenses on an oily nose with a fixed acetate bridge slide down all day.
+- **Measure:** a PD taken from a selfie is off by ±2.7 mm, which at −7 D gives 2 prism dioptres, three times the ANSI tolerance.
+
+Every virtual try-on, including Perfect Corp's own eyewear tool, shows frames **without lenses**, so none of this is visible. The only tools that come close are in-store optician systems costing about £28k (ZEISS VISUFIT) and a 2017 research paper.
 
 ## What it does
 
-**1. Live Rx Mirror: see yourself through your real lenses, live.**
-Your camera feed is re-rendered on the GPU through your exact prescription, every frame. A WebGL2 shader re-samples every pixel inside each lens from where its light really comes from, using your sphere, cylinder and axis plus the extra depth away from the optical centre. You see:
-- your eyes shrink or grow;
-- the face "cut-in" at the lens edge;
-- power rings on strong minus lenses;
-- frames that track your face.
+**1. Fit Check: will these glasses fail? (new to the web)**
+A remake-risk score from four models, each explained and each with a fix:
 
-**Showroom ↔ Your Rx** morphs between the lensless view every other try-on gives you and the reality. **Optics X-ray** draws a 2.5 mm grid on your face bent by the lens and colours the rim by edge thickness. PD is measured live from your iris, which is about 11.7 mm wide in nearly everyone.
+| Model | What it checks | Built on |
+|---|---|---|
+| **Look** | Edge or centre thickness around the real frame shape, decentred to your PD, plus how much smaller or bigger your eyes look to others | Lens sag + spectacle magnification |
+| **Sight** | Colour fringes for every lens material: a colour-clean zone and *chart lines of sharpness lost* at a 10 mm glance | Prentice's rule, Abbe number, Winter et al. *JOSA A* 2015 |
+| **Fit** | Will they slide down your nose? | Physics: frame + lens weight (from your Rx) under head movement, against grip from pad friction, ear hold and temple clamp. **Pad friction drops on oily skin, measured by YouCam Skin AI.** Silicone pads lose about 15% grip on oily skin; hard acetate loses about 40% (skin-tribology studies). Nose width at pad height comes from your photo. Pressure marks flagged above capillary pressure. |
+| **Measure** | Can your PD be trusted at your power? | Prism induced by PD uncertainty vs the ANSI Z80.1 0.67 Δ tolerance |
 
-**2. Frames and lens index ranked for *your* prescription.**
-- Every frame has real boxing dimensions.
-- The optics engine computes edge or centre thickness around the actual frame shape, decentred to your PD, plus weight, Abbe value and eye-size change.
-- An explainable **Rx-Fit** score ranks the frames.
-- The index advisor sometimes says *"1.74 would save only 0.5 mm for $149 more. Not worth it."*
+What-if controls (lens material, nose bridge, oiliness, known PD) move the score live. The **Sight simulator** shows a street scene through each material, fringes and all.
+
+**2. Live Rx Mirror: see yourself through your real lenses, live.**
+A WebGL2 shader re-renders your camera through your exact sphere, cylinder and axis every frame:
+- eye minification or magnification;
+- the face cut-in at the lens edge;
+- power rings;
+- physically scaled frames that track your face, with PD measured live from your iris.
+
+**Optics X-ray** bends a 2.5 mm grid through the lens and colours the rim by thickness.
 
 **3. Eye makeup retuned for your lenses: the YouCam beauty layer.**
-- **AI Face Analyzer** reads face shape, eye shape, size, setting, eyelids, brows and eye, brow and hair colour.
-- **AI Skin Analysis** (HD when the photo allows) scores the area a lens sits in front of: dark circles, eye bags, crow's feet, lid droop and tear trough.
-- Refract computes what your lenses will magnify or hide there.
-- **AI Makeup VTO** renders a generic tutorial look next to an **Rx-tuned** one:
-  - minus lenses: brighter shimmer lids, a thin liner and lifted lashes;
-  - plus lenses: matte, fine and precise, with more under-eye correction when your dark-circle score is low.
+- **AI Face Analyzer** reads face shape, eyes, lids, brows and colours.
+- **AI Skin Analysis** (HD when the photo allows) scores the eye area a lens magnifies: dark circles, eye bags, crow's feet, lid droop, tear trough. It also reads **oiliness**, which drives the Fit model.
+- **AI Makeup VTO** renders a generic look next to an **Rx-tuned** one: brighter behind minus lenses; matte and precise behind plus lenses.
 
-**4. One line on any store.**
-- A store adds `embed.js` and `data-refract-sku="juno"` to a button.
-- Shoppers get the Live Rx Mirror in a modal.
-- When they choose, the store receives a `refract:add-to-cart` event with the frame, lens index and predicted edge thickness.
-- The demo store, *Northlight*, is a fictional brand, and the integration works end to end.
+**4. A platform you can sell (SaaS).**
+- **One-line store embed:** `embed.js` plus `data-refract-sku`. The demo store "Northlight" receives `refract:add-to-cart` with the frame, lens index and edge thickness.
+- **REST API:** `POST /api/v1/risk` scores one frame, or ranks the catalogue.
+- **MCP server:** AI shopping agents (Claude, ChatGPT) get Rx-aware tools: `rank_frames`, `remake_risk`, `lens_report`, `sight_by_material`. Existing eyewear MCP servers only do cart and checkout.
+- **Retailer dashboard:**
+  - a simulated order stream: 11% of orders are high risk, and Refract's fixes cut high-risk orders by 62%;
+  - an ROI calculator (7.6% redo rate × $90 per remake);
+  - pricing at $49 / $199 / custom per store.
+- **Catalogue Rx audit** and an Rx-suitability feed.
 
-**5. And around it:**
-- **Voice-guided scan with auto-capture**, so you can scan without your glasses.
-- **Ask Refract**, an agent (Claude with tool use) whose every number comes from a visible tool call to the optics engine.
-- **Lab-ready order sheet** with mono PD and tolerance.
-- **Shareable Refract card**.
-- **Catalogue Rx audit for retailers**, with an Rx-suitability JSON feed that AI shopping agents can read.
+**Also included:** a voice-guided scan you can do without your glasses, a frame and lens-index ranker, an agent (Claude with tool use) where every number is a visible tool call, a lab-ready order sheet, and a shareable Refract card.
 
 ## How we built it
 
-**YouCam APIs**, called server-side on the India host `yce-api-01.makeupar.com`:
-- **Request flow:** File API → presigned PUT → task → poll. A task is never re-created on a slow poll, so units are never charged twice.
+**YouCam APIs**, server-side on `yce-api-01.makeupar.com`:
+- **Flow:** File API → presigned PUT → task → poll, never re-creating a task.
 - **`face-attr-analysis`:** 9 features.
-- **`skin-analysis` v2.1:** 6 eye-area concerns; HD is chosen automatically for large face crops.
-- **`makeup-vto`:** `eye_shadow`, `eye_liner`, `eyelashes`, `eyebrows` and `concealer` effects computed from the lens power, using official pattern names.
-- **Spend protection:** parameters are built server-side from presets, with per-IP limits and a daily unit budget.
-- **Robustness:** faces are auto-cropped to fill about 70% of the width; result images get their real type from their bytes (YouCam serves them as `binary/octet-stream`); downloads retry.
+- **`skin-analysis` v2.1:** 7 concerns including oiliness, still in the same unit tier; HD is chosen automatically.
+- **`makeup-vto`:** effects computed from your lens power.
+- **Spend protection:** parameters are built server-side, with per-IP limits and a daily unit budget.
+- **Robustness:** faces are auto-cropped so they fill about 70% of the frame; result images are typed from their bytes, because YouCam sends `binary/octet-stream`.
 
-**Optics engine** (pure JS, unit-tested):
-- meridional power;
-- spectacle magnification with a depth term;
-- lens sag and edge thickness around the real frame contour with decentration;
-- per-material minimum thickness;
-- weight integration;
-- an index advisor with an anti-upsell rule.
+**Engine** (pure JS, shared by the app, API, MCP server and agent):
+- optics: lens sag and edge thickness, weight, spectacle magnification with the iris 15 mm behind the lens, astigmatism axis;
+- sight: Prentice and Abbe, calibrated to Winter 2015;
+- fit physics: friction from Zhang & Mak 1999, clamp from Zhang 2024, capillary pressure threshold;
+- PD prism against ANSI Z80.1;
+- a seeded order simulator running in a Web Worker.
 
-**Vision and rendering:**
-- MediaPipe Face Landmarker (478 points with irises), with exponential smoothing so frames don't jitter.
-- A WebGL2 fragment shader for live mode that uses the same maths as the CPU compositor used for photos. Its inputs come from one tested function.
-- Canvas 2D for frames, power rings, glare and the X-ray.
+**Experiments:**
+- We tested whether one selfie can measure nose-bridge height. MediaPipe's depth returned 15–16 mm for every face: a learned average, not a measurement. So we use only reliable 2D measurements (iris-scaled nose width and face width) and ask one question about the bridge.
+- We fed a fake camera from a portrait video to test the GPU lens at 24–30 fps.
+- We ran the risk engine across 12 frames × 4 prescriptions and 300 simulated orders.
 
-**Agent:** Anthropic SDK with `claude-opus-5-5`, a manual tool loop over strict tools, and server-side fallbacks. A deterministic planner uses the same tools when no key is set.
+**Rendering:** MediaPipe Face Landmarker (478 points with irises) with smoothing; a WebGL2 lens shader; Canvas 2D for frames, X-ray and the Sight simulator; **anime.js** for all motion.
 
-**UI:** React 19 + Vite 6, a dark glass/HUD design system, and **anime.js**: split-text headline, scroll-triggered counters, a tech marquee, the Showroom↔Rx morph and a looping engine demo in the hero. It works at 390 px and 1440 px and installs as a PWA.
+**Quality:** 74 automated tests, including a real MCP client calling our server and API route tests. Three independent code reviews, with every finding fixed test-first. Headless-Chrome end-to-end runs.
 
-**Quality:**
-- 52 `node:test` tests.
-- Two independent code reviews, with every finding fixed test-first.
-- Headless-Chrome end-to-end runs, including a fake camera fed from a portrait to test the live shader.
+## Challenges
 
-## Challenges we ran into
+- Getting optics to look right, not just compute right: we added depth away from the optical centre to get the real cut-in.
+- Honest physics. Pure friction says weight doesn't matter, yet heavy glasses do slide. Modelling head movement (load that scales with mass) against holds that don't fixed it.
+- Avoiding overclaiming. We don't show 1.74 as "clearer" (its Abbe number is 32), and we don't trust single-image depth.
+- YouCam's eyewear try-on is enterprise-only, so YouCam powers the beauty and skin layer while we render the lenses.
 
-- **Making optics look right, not just compute right.** A single magnification factor looked fake. Modelling depth away from the optical centre produced the real cut-in you see on strong lenses.
-- **Live performance.** We moved the per-pixel lens maths from the CPU to a WebGL2 shader and upload lens masks as a small texture each frame. It holds 24–30 fps even on software rendering.
-- **The API's eyewear products are enterprise-only.** Refract uses YouCam for the beauty layer (face, skin and makeup) and draws physically scaled frames itself.
-- **Indian ISPs block perfectcorp.com hosts.** We moved everything to the `makeupar.com` mirror.
+## Accomplishments
 
-## Accomplishments we're proud of
-
-- A live mirror that shows your eyes through your real prescription, which we couldn't find in any eyewear or beauty try-on.
-- A real, working one-line store integration.
-- Makeup advice driven by your lens power and your YouCam scores.
-- An index advisor honest enough to say "don't pay for this".
-
-## What we learned
-
-The lens is part of the look. Frame choice, lens index and eye makeup are one decision, and your prescription is the input every try-on ignores.
+- A remake-risk check with physics-based slip prediction that uses YouCam skin oiliness. We found nothing like it in products, patents or papers.
+- The first online live try-on showing what your prescription does to your face. The research ancestor is Zhang et al., *IEEE CG&A* 2017, offline.
+- A real platform: an embed, an API and an MCP server.
 
 ## What's next
 
-- Progressive and bifocal lens zones.
-- Contact-lens mode with YouCam eye-colour VTO.
-- A Shopify app wrapping the embed.
-- Optician hand-off with the lab-ready order sheet.
+- Progressive lens corridor simulation (Minkwitz).
+- Validating slip predictions with a pilot store's return data.
+- A Shopify app.
+- Optician hand-off with the order sheet.
 
 ## Built with
 
-React · Vite · WebGL2 · anime.js · MediaPipe · Node.js · Express · Vercel · YouCam API (AI Face Analyzer, AI Skin Analysis, AI Makeup VTO) · Anthropic Claude API
+React · Vite · WebGL2 · anime.js · MediaPipe · Node.js · Express · MCP SDK · Vercel · YouCam API (AI Face Analyzer, AI Skin Analysis, AI Makeup VTO) · Anthropic Claude API
 
----
-
-**Screenshots:** `docs/screenshots/` (01–11). **Disclaimer:** cosmetic shopping preview, not medical advice. Sample portraits are YouCam API documentation sample images; Northlight is a fictional demo store.
+**Evidence and sources:** `docs/EVIDENCE.md`. **Screenshots:** `docs/screenshots/`. Cosmetic and shopping guidance, not medical advice.

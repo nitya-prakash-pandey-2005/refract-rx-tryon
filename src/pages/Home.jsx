@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { Aperture, ArrowRight, Store, Sparkles, Glasses, ScanEye, Droplets, Palette, Bot, Cpu, ShoppingBag, ScanFace, Code2 } from "lucide-react";
+import { Aperture, ArrowRight, Store, Sparkles, Glasses, ScanEye, Droplets, Palette, Bot, Cpu, ShoppingBag, ScanFace, Code2, ShieldCheck } from "lucide-react";
 import { animate, stagger, splitText } from "animejs";
 import { Card, Hud, Badge } from "../ui";
 import { useStore } from "../state/store";
@@ -10,15 +10,16 @@ import DemoPicker from "../components/DemoPicker";
 const IMPACT = [
   { to: 2.2, dec: 1, suffix: "B", label: "people live with a near or distance vision impairment", src: "WHO, World report on vision" },
   { to: 50, dec: 0, suffix: "%", label: "of the world projected to be shortsighted by 2050", src: "Holden et al., Ophthalmology 2016" },
-  { to: 9, dec: 0, suffix: "%", prefix: "−", label: "how much smaller your eyes look to others behind −8 D lenses", src: "Spectacle magnification, 12 mm vertex" },
+  { to: 7.6, dec: 1, suffix: "%", label: "of prescription glasses are redone; 1 in 8 redos is a measurement error", src: "Vision Council lab + ECP surveys" },
   { to: 20, dec: 0, suffix: "%", prefix: "15–", label: "of eyewear bought online is returned", src: "Industry estimates" },
 ];
 const PRODUCTS = [
+  { icon: ShieldCheck, kicker: "Predict", title: "Fit Check: will these glasses fail?", body: "Remake risk before checkout, from four models: lens thickness and eye size (optics), colour fringes by material (Abbe + Prentice), sliding off your nose (lens weight + YouCam oiliness + nose fit) and PD accuracy (ANSI tolerance). Each with the fix.", to: "#/check", cta: "Check my glasses" },
   { icon: Aperture, kicker: "For shoppers", title: "Live Rx Mirror", body: "Your camera, re-rendered on the GPU through your exact sphere, cylinder and axis. Frames track your face; your eyes shrink or grow exactly as they will.", to: "#/live", cta: "Start Live Mirror" },
   { icon: Palette, kicker: "For beauty", title: "Makeup retuned for your lenses", body: "YouCam reads your eyes and eye-area skin, then renders a look that works behind your lens power: brighter behind minus, matte and precise behind plus.", to: "#/profile", cta: "See the YouCam analysis" },
-  { icon: Store, kicker: "For retailers", title: "One line on any store", body: "Add embed.js and a data-refract-sku attribute. Shoppers try frames with their real Rx; you get the frame, lens index and edge thickness back in the cart.", to: "/store/index.html", cta: "Open the demo store", external: true },
+  { icon: Store, kicker: "Platform", title: "Embed, API and MCP", body: "One script tag on any store, a REST API for order-time risk scoring, and an MCP server so AI shopping agents can ask prescription-aware questions. Sold as SaaS per store.", to: "#/retail", cta: "See the retailer dashboard" },
 ];
-const TECH = ["WebGL2 lens shader", "478-point face mesh", "Iris-scaled PD", "Cylinder-axis optics", "Lens sag + edge thickness", "YouCam Face Analyzer", "YouCam Skin Analysis HD", "YouCam Makeup VTO", "Claude tool-use agent", "Rx-suitability feed", "One-line store embed", "Installable PWA"];
+const TECH = ["Remake-risk engine", "Slip physics (skin tribology)", "Abbe + Prentice colour model", "ANSI Z80.1 PD tolerance", "MCP server for AI agents", "WebGL2 lens shader", "478-point face mesh", "Iris-scaled PD", "Cylinder-axis optics", "Lens sag + edge thickness", "YouCam Face Analyzer", "YouCam Skin Analysis HD", "YouCam Makeup VTO", "Claude tool-use agent", "Rx-suitability feed", "One-line store embed", "Installable PWA"];
 const APIS = [
   { icon: ScanEye, name: "AI Face Analyzer", use: "Face shape, eye shape, size, setting, lids, brows and colours drive frame ranking and makeup placement." },
   { icon: Droplets, name: "AI Skin Analysis", use: "Dark circles, eye bags, crow's feet, lid droop and tear trough: the area a plus lens magnifies." },
@@ -57,13 +58,13 @@ export default function Home() {
     <div className="stack-lg home" ref={root}>
       <section className="hero" data-tour="home-hero">
         <div className="hero-copy">
-          <span data-hero><Hud tone="pink">Prescription-true try-on · built on YouCam AI</Hud></span>
-          <h1 ref={title}>See yourself through your real prescription.</h1>
-          <p className="lead" data-hero>Every virtual try-on shows frames <b>without lenses</b>. Refract renders your eyes, the lens edge and your eye makeup through your actual Rx, live on your camera and on any store, then picks the frame, lens and look that suit you.</p>
+          <span data-hero><Hud tone="pink">Prescription intelligence for eyewear · built on YouCam AI</Hud></span>
+          <h1 ref={title}>Know your glasses will work, before you buy them.</h1>
+          <p className="lead" data-hero>Glasses fail after you buy them: thick edges, rainbow fringes, frames that slide down your nose, a PD that's off. Refract <b>predicts all four before checkout</b> from optics, physics and YouCam Skin AI, then shows you live, through your real lenses, with eye makeup retuned for them.</p>
           <div className="row wrap" style={{ gap: 10 }} data-hero>
-            <a className="btn primary lg" href="#/live"><Aperture size={18} />Start Live Mirror</a>
-            <a className="btn lg" href="/store/index.html"><Store size={18} />Try it in a store</a>
-            <a className="btn lg ghost" href={s.photo ? "#/studio" : "#/scan"}>{s.photo ? "Open my Studio" : "Use a photo"}<ArrowRight size={16} /></a>
+            <a className="btn primary lg" href="#/check"><ShieldCheck size={18} />Check my glasses</a>
+            <a className="btn lg" href="#/live"><Aperture size={18} />Live Rx Mirror</a>
+            <a className="btn lg ghost" href="/store/index.html"><Store size={18} />Try it in a store</a>
           </div>
           <div className="hero-trust row wrap" data-hero>
             <span><Cpu size={14} /> Runs in the browser</span>
@@ -86,10 +87,10 @@ export default function Home() {
 
       <section data-section>
         <div className="section-head" data-reveal>
-          <Hud tone="cyan">One optics engine · three experiences</Hud>
-          <h2>The lens is part of the look. Now every try-on can see it.</h2>
+          <Hud tone="cyan">One engine · predict, see, look, sell</Hud>
+          <h2>The first eyewear try-on that knows your prescription, your face and your skin.</h2>
         </div>
-        <div className="grid g3">
+        <div className="grid g4">
           {PRODUCTS.map((p) => (
             <Card key={p.title} className="interactive product-card" data-reveal>
               <span className="step-ic"><p.icon size={18} /></span>

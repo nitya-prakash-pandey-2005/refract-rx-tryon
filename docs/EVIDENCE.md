@@ -69,3 +69,21 @@ We ran MediaPipe Face Landmarker on four portraits (YouCam sample images), with 
   - nose width at pad height 12.8–13.9 mm.
 
 Refract therefore measures nose width and face width from the photo, takes skin oiliness from YouCam Skin AI, and asks one question for bridge height ("do glasses rest on your cheeks?").
+
+## Constants in the models, with sources
+| Model | Constant | Value | Source |
+|---|---|---|---|
+| Sight | Perceived colour split | 0.49 ± 0.03 arcmin per Δ (V≈32 lens) | Winter et al., *JOSA A* 32(10):1764, 2015 [PDF](https://www.aphys.kth.se/polopoly_fs/1.591766!/Effect_of_induced_transverse_chromatic_aberration_on_peripheral_vision.pdf) |
+| Sight | Acuity cost | 0.032 logMAR per arcmin of TCA (foveal); 0.1 logMAR = 1 chart line | Winter 2015; Meslin & Obrecht 1988 |
+| Sight | Noticeable TCA | about 0.1 Δ; clean-zone radius ≈ V/\|F\| mm | Jalie (teaching sources) |
+| Sight | Abbe numbers | CR-39 58 · PC 30 · MR-8 41 · MR-7 31–32 · 1.74 32 | Mitsui MR brochure, Universe Optical |
+| Look | Observer magnification | 1/(1 − d·F), d = vertex 12 mm + about 3 mm to the iris | Spectacle-magnification optics |
+| Fit | Silicone pad on skin | μ = 0.61 ± 0.21 (in vivo) | Zhang & Mak, *Prosthet Orthot Int* 1999 |
+| Fit | Hard polymer on skin | μ ≈ 0.37–0.5; lubricating lipid/sweat films lower friction on smooth hard surfaces | Zhang & Mak 1999; Gerhardt et al., *Tribol Lett* 2009; J Bionic Eng 2014 |
+| Fit | Comfortable temple clamp | 0.34 N per temple (cantilever model) | Zhang, Chen & Luximon, *Meas. Sci. Technol.* 35:105903, 2024 |
+| Fit | Pressure marks | about 4.3 kPa sustained (capillary closure); 14.7 kPa pad design limit | Landis; nose-pad patent |
+| Measure | Prism tolerance | ≤ 0.67 Δ unwanted horizontal prism | ANSI Z80.1 |
+| PD | Iris ruler | HVID 11.7 ± 0.5 mm; depth error 4.3 ± 2.4% | Google MediaPipe Iris |
+| Depth | Face Mesh z | "not metrically accurate" (synthetic supervision) | Kartynnik et al., arXiv:1907.06724 |
+
+The slip score is a physics-based **heuristic**, not a validated predictor. Validating it against a pilot store's return data is the next step.

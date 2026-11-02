@@ -7,7 +7,8 @@ const ensureProfile = () => { if (!getStore().photo) loadPersona("lena").catch((
 
 configureTour({
   steps: [
-    { id: "t1", route: "/", target: "home-hero", title: "The problem", body: "Every virtual try-on shows frames without lenses. Real lenses shrink or magnify your eyes and can be thick at the edges. Refract shows the truth.", action: ensureProfile },
+    { id: "t1", route: "/", target: "home-hero", title: "The problem", body: "7.6% of prescription glasses get redone, and online returns run 15 to 22%. Every try-on ignores the lens. Refract predicts the failure before checkout and shows the truth.", action: ensureProfile },
+    { id: "t1a", route: "/check", target: "risk-score", title: "Will these glasses fail?", body: "Refract predicts the four ways glasses get remade: thick edges, colour fringes, sliding down your nose (lens weight + your YouCam oiliness) and PD error. Change the lens or bridge and watch the risk move." },
     { id: "t1b", route: "/live", target: "live-stage", title: "Live Rx Mirror", body: "Start the camera: a GPU shader renders your face through your exact lenses, every frame. Toggle Optics X-ray to see the lens bend a grid on your face." },
     { id: "t2", route: "/scan", target: "scan-stage", title: "Scan without your glasses", body: "Live checks and voice guidance mean you don't need to see the screen. Your iris (about 11.7 mm in nearly everyone) is the ruler for PD." },
     { id: "t3", route: "/rx", target: "rx-form", title: "Your prescription", body: "Enter your Rx and see how much your lenses change how your eyes look, with a true-scale lens cross-section." },

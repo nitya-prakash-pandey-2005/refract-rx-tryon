@@ -13,7 +13,7 @@ const PEOPLE = [
   { id: "helen", photo: "public/demo/helen.png", preset: "+3.00 reading" },
 ].filter((p) => !process.argv[2] || p.id === process.argv[2]);
 
-const browser = await puppeteer.launch({ executablePath: CHROME, headless: "new" });
+const browser = await puppeteer.launch({ executablePath: CHROME, headless: "new", protocolTimeout: 400000 });
 const page = await browser.newPage();
 await page.setViewport({ width: 1440, height: 1000 });
 page.on("console", (m) => { if (m.type() === "error" && !/XNNPACK|TensorFlow Lite/.test(m.text())) console.log("  console:", m.text()); });
@@ -27,9 +27,11 @@ for (const p of PEOPLE) {
   await page.waitForFunction(() => location.hash.startsWith("#/rx"), { timeout: 60000 });
   await page.evaluate((label) => [...document.querySelectorAll("button.chip")].find((b) => b.textContent.includes(label))?.click(), p.preset);
   await page.goto(`${BASE}/#/profile?record=${p.id}`, { waitUntil: "networkidle0" });
+  await new Promise((r) => setTimeout(r, 1500));
   await page.evaluate(() => [...document.querySelectorAll(".page-head button")].find((b) => /Run YouCam/.test(b.textContent))?.click());
-  await page.waitForFunction(() => document.querySelector(".compare") || [...document.querySelectorAll(".toast")].some((t) => /failed|isn't|couldn't|out of units|too/i.test(t.textContent)), { timeout: 300000, polling: 1000 });
-  const result = await page.evaluate(() => ({ ok: !!document.querySelector(".compare"), toast: [...document.querySelectorAll(".toast")].map((t) => t.textContent).join(" | "), ledger: [...document.querySelectorAll(".li .t")].map((e) => e.textContent).slice(0, 6) }));
+  await new Promise((r) => setTimeout(r, 1000));
+  await page.waitForFunction(() => document.querySelector(".compare") || document.querySelector(".card.alert"), { timeout: 300000, polling: 1000 });
+  const result = await page.evaluate(() => ({ ok: !!document.querySelector(".compare"), toast: document.querySelector(".card.alert")?.textContent || "YouCam analysis complete" }));
   console.log(`  ${result.ok ? "done" : "FAILED"} ${result.toast}`);
 }
 await browser.close();
