@@ -48,3 +48,13 @@ export function warpSource(px, py, lens, power, mmPerPx, t = 1) {
   const a = dx * ax + dy * ay, p = -dx * ay + dy * ax;
   return { x: lens.oc.x + (a / ma) * ax - (p / mp) * ay, y: lens.oc.y + (a / ma) * ay + (p / mp) * ax };
 }
+
+// Shader inputs for the live GPU mirror: the same quantities warpSource uses, per eye.
+// fa = power along the cylinder axis, fp = power across it (both already scaled by t).
+export function lensUniforms(place, rx, t = 1) {
+  const eye = (side) => {
+    const L = place.lenses[side];
+    return { oc: [L.oc.x, L.oc.y], axis: [L.axis.x, L.axis.y], fa: rx[side].sph * t + 0, fp: (rx[side].sph + rx[side].cyl) * t + 0 };
+  };
+  return { od: eye("od"), os: eye("os"), mmPerPx: place.mmPerPx, depth: [EYE_DEPTH_M, DEPTH_GAIN] };
+}

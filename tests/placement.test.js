@@ -41,3 +41,19 @@ test("cylinder only distorts across its axis", () => {
   assert.ok(Math.abs(along.x - 650) < 1e-9);
   assert.ok(across.y > 400);
 });
+
+import { lensUniforms } from "../src/engine/placement.js";
+
+test("lens uniforms carry exactly what warpSource uses, scaled by t", () => {
+  const p = placeFrame({ landmarks: lm, W, H, mmPerPx, frame: FRAMES[0], rx: { od: { sph: -6, cyl: -1, axis: 30 }, os: { sph: -5, cyl: 0, axis: 0 } } });
+  const u = lensUniforms(p, { od: { sph: -6, cyl: -1, axis: 30 }, os: { sph: -5, cyl: 0, axis: 0 } }, 0.5);
+  assert.deepEqual(u.od.oc, [p.lenses.od.oc.x, p.lenses.od.oc.y]);
+  assert.deepEqual(u.od.axis, [p.lenses.od.axis.x, p.lenses.od.axis.y]);
+  assert.equal(u.od.fa, -3);
+  assert.equal(u.od.fp, -3.5);
+  assert.equal(u.os.fa, -2.5);
+  assert.equal(u.mmPerPx, mmPerPx);
+  const z = lensUniforms(p, { od: { sph: -6, cyl: -1, axis: 30 }, os: { sph: -5, cyl: 0, axis: 0 } }, 0);
+  assert.equal(z.od.fa, 0);
+  assert.equal(z.os.fp, 0);
+});
