@@ -9,6 +9,7 @@ import "./styles/components.css";
 import "./styles/layout.css";
 import "./styles/tour.css";
 import "./styles/refract.css";
+import "./styles/home.css";
 import { applySavedTheme } from "./lib/theme";
 import App from "./App";
 

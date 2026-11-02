@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ShieldCheck, Eye, Glasses, Ruler, Gauge as GaugeIcon, Sparkles, AlertTriangle, CheckCircle2, Droplets, ArrowRight } from "lucide-react";
+import { ShieldCheck, Eye, Glasses, Ruler, Gauge as GaugeIcon, Sparkles, AlertTriangle, CheckCircle2, Droplets, ArrowRight, ScanSearch } from "lucide-react";
 import { Card, PageHead, Hud, Badge, Seg, Toggle, Drivers } from "../ui";
 import { useStore, setStore } from "../state/store";
 import { navigate } from "../lib/router";
 import { countUp, useReveal } from "../lib/anim";
-import { FRAMES, getFrame } from "../engine/frames";
+import { FRAMES, SHAPES, getFrame, parseFrameSize } from "../engine/frames";
 import { INDICES } from "../engine/optics";
 import { remakeRisk } from "../engine/risk";
 import { materialSight } from "../engine/sight";
@@ -22,7 +22,7 @@ const PART = [
 
 export default function Check({ parts }) {
   const s = useStore();
-  const root = useRef(null), scoreEl = useRef(null);
+  const root = useRef(null), scoreEl = useRef(null), strip = useRef(null);
   const frame = getFrame(parts[1]) || getFrame(s.lastFrame) || FRAMES[0];
   const [indexN, setIndexN] = useState("best");
   const [bridge, setBridge] = useState(s.bridge || "medium");
@@ -33,21 +33,33 @@ export default function Check({ parts }) {
   const pd = { ...basePd, plusMinus: pdKnown ? 0.5 : basePd.plusMinus };
   const face = { faceWidthMm: s.measure?.faceWidthMm, noseWidthMm: s.measure?.noseWidthMm, bridge };
   const index = indexN === "best" ? undefined : INDICES.find((i) => i.n === indexN);
-  const risk = useMemo(() => remakeRisk({ frame, rx: s.rx, pd, face, oiliness: oil, index }), [frame.id, JSON.stringify(s.rx), indexN, bridge, oil, pdKnown, s.measure]); // eslint-disable-line react-hooks/exhaustive-deps
-  const asOrdered = useMemo(() => remakeRisk({ frame, rx: s.rx, pd: basePd, face: { ...face, bridge: s.bridge || "medium" }, oiliness: s.skin?.oiliness ?? 60 }), [frame.id, JSON.stringify(s.rx), s.measure]); // eslint-disable-line react-hooks/exhaustive-deps
+  const risk = useMemo(() => remakeRisk({ frame, rx: s.rx, pd, face, oiliness: oil, index }), [frame, JSON.stringify(s.rx), indexN, bridge, oil, pdKnown, s.measure]); // eslint-disable-line react-hooks/exhaustive-deps
+  const asOrdered = useMemo(() => remakeRisk({ frame, rx: s.rx, pd: basePd, face: { ...face, bridge: s.bridge || "medium" }, oiliness: s.skin?.oiliness ?? 60 }), [frame, JSON.stringify(s.rx), s.measure]); // eslint-disable-line react-hooks/exhaustive-deps
   const ranked = useMemo(() => FRAMES.map((f) => ({ f, r: remakeRisk({ frame: f, rx: s.rx, pd, face, oiliness: oil, index }) })).sort((a, b) => a.r.score - b.r.score), [JSON.stringify(s.rx), indexN, bridge, oil, pdKnown, s.measure]); // eslint-disable-line react-hooks/exhaustive-deps
+  const mine = getFrame("custom");
+  const mineRisk = useMemo(() => mine && remakeRisk({ frame: mine, rx: s.rx, pd, face, oiliness: oil, index }), [mine, JSON.stringify(s.rx), indexN, bridge, oil, pdKnown, s.measure]); // eslint-disable-line react-hooks/exhaustive-deps
   const strongest = Math.max(Math.abs(s.rx.od.sph), Math.abs(s.rx.os.sph), Math.abs(s.rx.od.sph + s.rx.od.cyl), Math.abs(s.rx.os.sph + s.rx.os.cyl));
   const sightRows = materialSight({ sph: strongest, cyl: 0, axis: 0 }); // same power as the simulator
   useReveal(root, []);
   useEffect(() => { countUp(scoreEl.current, risk.score, { duration: 700 }); }, [risk.score]);
   useEffect(() => { setStore({ lastFrame: frame.id }); }, [frame.id]);
+  useEffect(() => { const el = strip.current, on = el?.querySelector(".on"); if (el && on) el.scrollLeft = Math.max(0, on.offsetLeft - el.offsetLeft - 8); }, [frame]);
   const slip = risk.parts.fit.detail;
 
   return (
     <div className="stack-lg" ref={root}>
-      <PageHead kicker="Remake-risk check" title={`Will ${frame.name} work for you?`} sub="Glasses fail after purchase in four ways. Refract predicts each one before you buy, from optics, physics and your YouCam skin scan." right={<Badge tone="violet"><ShieldCheck size={13} /> First on the web</Badge>} />
+      <PageHead kicker="Remake-risk check" title={frame.custom ? `Will this ${frame.A}□${frame.DBL} frame work for you?` : `Will ${frame.name} work for you?`} sub="Glasses fail after purchase in four ways. Refract predicts each one before you buy, from optics, physics and your YouCam skin scan." right={<Badge tone="violet"><ShieldCheck size={13} /> First on the web</Badge>} />
 
-      <div className="frame-strip" data-reveal>
+      <AnyFrame spec={s.customFrame} active={Boolean(frame.custom)} />
+
+      <div className="frame-strip" ref={strip} data-reveal>
+        {mine && (
+          <button className={`frame-chip mine ${frame.custom ? "on" : ""}`} onClick={() => navigate("/check/custom")}>
+            <FrameArt frame={mine} height={30} />
+            <span className="row between"><b>{mine.A}□{mine.DBL}</b><span className={`num tiny ${mineRisk.level === "low" ? "good" : mineRisk.level === "medium" ? "ok" : "bad"}`}>{mineRisk.score}</span></span>
+            <span className="tiny muted">your frame · {mine.material}</span>
+          </button>
+        )}
         {ranked.map(({ f, r }) => (
           <button key={f.id} className={`frame-chip ${f.id === frame.id ? "on" : ""}`} onClick={() => navigate(`/check/${f.id}`)}>
             <FrameArt frame={f} height={30} />
@@ -148,6 +160,54 @@ function SlipDiagram({ slip }) {
       <text x="200" y="60" style={{ font: "500 11px var(--font-mono)" }} fill="var(--muted)">slip margin (≥1.5× stays put)</text>
       <text x="200" y="92" style={{ font: "600 11px var(--font-mono)" }} fill="var(--rose)">load: {slip.totalWeightG.toFixed(0)} g + head movement</text>
       <text x="200" y="110" style={{ font: "600 11px var(--font-mono)" }} fill="var(--green)">grip: pads + ears + temples</text>
+    </svg>
+  );
+}
+
+const SHAPE_LABEL = { round: "Round", oval: "Oval", rect: "Rectangle", square: "Square", browline: "Browline", panto: "Panto", cat: "Cat-eye", butterfly: "Butterfly", aviator: "Aviator", geo: "Geometric" };
+
+// A frame from any store, checked by the size printed inside its arm.
+function AnyFrame({ spec, active }) {
+  const [size, setSize] = useState(spec ? `${spec.A}□${spec.DBL} ${spec.temple || 140}` : "");
+  const [height, setHeight] = useState(spec?.B ? String(spec.B) : "");
+  const [shape, setShape] = useState(spec?.shape || "rect");
+  const [material, setMaterial] = useState(spec?.material || "acetate");
+  const parsed = parseFrameSize(size);
+  function go(e) {
+    e.preventDefault();
+    if (!parsed) return;
+    setStore({ customFrame: { ...parsed, B: Number(height) || undefined, shape, material } });
+    navigate("/check/custom");
+  }
+  return (
+    <Card className={`any-frame ${active ? "glow" : ""}`} data-reveal tour="any-frame">
+      <div className="any-frame-head">
+        <span className="step-ic"><ScanSearch size={17} /></span>
+        <div className="grow">
+          <b>Looking at glasses on another website or in a shop?</b>
+          <p className="small text-2">Type the size printed inside the arm (or in the product listing). Refract checks that exact frame against your prescription.</p>
+        </div>
+        <TempleArm text={parsed ? `${parsed.A} □ ${parsed.DBL}  ${parsed.temple || 140}` : "52 □ 18  140"} />
+      </div>
+      <form className="any-frame-form" onSubmit={go}>
+        <label className="field"><span className="tiny">Size: lens □ bridge arm</span><input className="input mono" value={size} onChange={(e) => setSize(e.target.value)} placeholder="52□18 140" aria-invalid={Boolean(size && !parsed)} /></label>
+        <label className="field"><span className="tiny">Lens height (if listed)</span><input className="input mono" inputMode="numeric" value={height} onChange={(e) => setHeight(e.target.value.replace(/[^0-9.]/g, ""))} placeholder="auto" /></label>
+        <label className="field"><span className="tiny">Shape</span><select className="select" value={shape} onChange={(e) => setShape(e.target.value)}>{SHAPES.map((k) => <option key={k} value={k}>{SHAPE_LABEL[k]}</option>)}</select></label>
+        <label className="field"><span className="tiny">Material</span><Seg options={[{ value: "acetate", label: "Plastic" }, { value: "metal", label: "Metal" }, { value: "titanium", label: "Titanium" }]} value={material} onChange={setMaterial} /></label>
+        <button className="btn primary" disabled={!parsed}><ShieldCheck size={16} />Check this frame</button>
+      </form>
+      {size && !parsed && <span className="tiny" style={{ color: "var(--amber)" }}>Type at least the lens width and bridge, like 52-18 (lens 33–66 mm, bridge 12–26 mm).</span>}
+    </Card>
+  );
+}
+
+// Where the size lives: the inside of a temple arm.
+function TempleArm({ text }) {
+  return (
+    <svg className="temple-arm desktop-only" viewBox="0 0 230 54" aria-hidden="true">
+      <path d="M6 16 H186 C204 16 214 22 222 40" fill="none" stroke="var(--line-2)" strokeWidth="12" strokeLinecap="round" />
+      <text x="20" y="20" fill="var(--cyan)" style={{ font: "600 11px var(--font-mono)" }}>{text}</text>
+      <text x="20" y="46" fill="var(--muted)" style={{ font: "500 9px var(--font-mono)" }}>lens · bridge · arm (mm)</text>
     </svg>
   );
 }

@@ -220,3 +220,14 @@ i.lg { display: inline-block; width: 12px; height: 12px; border-radius: 4px; ver
 .plan-list li { display: flex; gap: 8px; align-items: center; }
 .plan-list svg { color: var(--green); flex: none; }
 .api-out { max-height: 260px; overflow: auto; }
+
+/* Fit Check: a frame from any store */
+.any-frame { display: grid; gap: 12px; }
+.any-frame-head { display: flex; gap: 12px; align-items: center; }
+.any-frame-head p { margin: 2px 0 0; }
+.any-frame-form { display: grid; grid-template-columns: 1.3fr .9fr 1fr 1.4fr auto; gap: 10px; align-items: end; }
+.any-frame-form .seg { width: 100%; }
+.temple-arm { width: 220px; flex: none; }
+.frame-chip.mine { border-style: dashed; border-color: var(--cyan); }
+.frame-chip.mine.on { background: var(--cyan-a, rgba(34,211,238,.1)); }
+@media (max-width: 900px) { .any-frame-form { grid-template-columns: 1fr 1fr; } .any-frame-form .btn { grid-column: 1 / -1; } }

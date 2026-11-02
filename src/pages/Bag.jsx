@@ -45,14 +45,14 @@ export default function Bag() {
   if (!frame && !makeup.length)
     return (
       <div className="stack-lg">
-        <PageHead kicker="Bag" title="Your bag is empty" sub="Try frames on through your own lenses, then add the frame, lens index and eye look you like." />
-        <Card className="pad-lg"><div className="empty"><ShoppingBag size={34} /><p className="small muted">Nothing here yet.</p><a className="btn primary" href="#/studio">Open the Studio</a></div></Card>
+        <PageHead kicker="Shortlist" title="Your shortlist is empty" sub="Check frames through your own lenses, then save the frame, lens and look you like. You get a lens report to take to any store or optician." />
+        <Card className="pad-lg"><div className="empty"><ShoppingBag size={34} /><p className="small muted">Nothing here yet.</p><a className="btn primary" href="#/check">Check a pair</a></div></Card>
       </div>
     );
 
   return (
     <div className="stack-lg">
-      <PageHead kicker="Bag" title="Order sheet" sub="Everything a lab needs, plus the look that goes with it. You confirm; nothing is charged in this demo." />
+      <PageHead kicker="Shortlist" title="Your lens report" sub="Everything a store or lab needs to make this pair right: frame, lens index, PD and the predicted edge. Take it to any shop or optician; Refract never charges you." />
       <div className="grid g-12">
         <div className="span-7 stack">
           {frame && (
@@ -96,11 +96,11 @@ export default function Bag() {
             <div className="row between"><span className="muted">Total</span><span className="display-sm">${total.toFixed(0)} <small>₹{Math.round(total * INR).toLocaleString("en-IN")}</small></span></div>
             <div className="stack-sm" style={{ marginTop: 14 }}>
               {placed ? (
-                <div className="callout row"><CheckCircle2 size={18} color="var(--green)" /><span className="small">Order sheet confirmed. In a live store this goes to the lab after your optician checks it.</span></div>
+                <div className="callout row"><CheckCircle2 size={18} color="var(--green)" /><span className="small">Saved. Download the report and show it to any store or optician; stores that use Refract receive it with the order.</span></div>
               ) : (
-                <button className="btn primary lg block" onClick={() => { setPlaced(true); toast("Demo store: order confirmed, no payment taken.", "ok"); }}>Confirm order</button>
+                <button className="btn primary lg block" onClick={() => { setPlaced(true); toast("Saved to your lens report. Nothing is charged.", "ok"); }}>This is the pair I want</button>
               )}
-              <button className="btn block" onClick={download}><Download size={16} />Download lab-ready order sheet</button>
+              <button className="btn block" onClick={download}><Download size={16} />Download lens report</button>
             </div>
           </Card>
           <Card title="No surprises when it arrives" icon={ShieldCheck}>

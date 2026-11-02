@@ -1,6 +1,7 @@
 // App state in one small store, persisted to localStorage (photos never leave the browser
 // except to run a YouCam task). Components read with useStore(); write with setStore().
 import { useSyncExternalStore } from "react";
+import { setCustomFrame } from "../engine/frames";
 
 const KEY = "refract.v1";
 export const DEFAULT_RX = { od: { sph: -6.5, cyl: -0.75, axis: 180 }, os: { sph: -6.0, cyl: -0.5, axis: 175 } };
@@ -18,6 +19,7 @@ const DEFAULT = {
   persona: null, // demo persona id when replaying recorded data
   index: null, // chosen lens index n
   lastFrame: "pico",
+  customFrame: null, // { A, DBL, temple, B?, shape, material }: a frame from any store, by its printed size
 };
 
 function load() {
@@ -30,6 +32,7 @@ function load() {
 }
 
 let state = load();
+setCustomFrame(state.customFrame);
 const subs = new Set();
 
 function save() {
@@ -42,12 +45,15 @@ function save() {
 
 export const getStore = () => state;
 export function setStore(patch) {
+  const prev = state;
   state = { ...state, ...(typeof patch === "function" ? patch(state) : patch) };
+  if (state.customFrame !== prev.customFrame) setCustomFrame(state.customFrame);
   save();
   subs.forEach((f) => f());
 }
 export function resetStore() {
   state = { ...DEFAULT };
+  setCustomFrame(null);
   save();
   subs.forEach((f) => f());
 }

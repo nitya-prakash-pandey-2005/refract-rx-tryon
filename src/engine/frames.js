@@ -30,7 +30,37 @@ export const FRAMES = [
     colorway: { name: "Titanium", rim: "#8d8f96", accent: "#d6d8de" }, priceUsd: 129, faceShapes: ["square", "diamond", "oval", "invtriangle"] },
 ];
 
-export const getFrame = (id) => FRAMES.find((f) => f.id === id);
+// Any frame from any store: every frame has its size printed inside a temple arm as
+// "lens width □ bridge temple" (e.g. 52□18 140). Lens height is rarely printed, so it is
+// estimated from the shape (ratios of the catalogue above) unless the listing gives it.
+export const SHAPES = ["round", "oval", "rect", "square", "browline", "panto", "cat", "butterfly", "aviator", "geo"];
+const HEIGHT_RATIO = { round: 0.9, oval: 0.72, rect: 0.68, square: 0.85, browline: 0.78, panto: 0.86, cat: 0.79, butterfly: 0.88, aviator: 0.86, geo: 0.86 };
+const GRAMS_PER_MM = { metal: 0.29, titanium: 0.2, acetate: 0.49 }; // frame weight per mm of lens width
+const COLORWAYS = { metal: { name: "Your frame", rim: "#6b6f7b", accent: "#b4b8c6" }, titanium: { name: "Your frame", rim: "#8d8f96", accent: "#d6d8de" }, acetate: { name: "Your frame", rim: "#16161c", accent: "#3a3a48" } };
+
+export function parseFrameSize(text) {
+  const n = String(text ?? "").match(/\d+(?:\.\d+)?/g)?.map(Number) || [];
+  if (n.length < 2) return null;
+  const [A, DBL, temple = null] = n;
+  if (A < 33 || A > 66 || DBL < 12 || DBL > 26) return null;
+  return { A, DBL, temple: temple >= 115 && temple <= 160 ? temple : null };
+}
+
+export function customFrame({ A, DBL, B, temple, shape = "rect", material = "acetate" }) {
+  const sh = SHAPES.includes(shape) ? shape : "rect";
+  const mat = GRAMS_PER_MM[material] ? material : "acetate";
+  const height = Number(B) >= 20 && Number(B) <= 60 ? Number(B) : Math.round(A * HEIGHT_RATIO[sh]);
+  return {
+    id: "custom", name: `Your ${A}□${DBL}`, custom: true, shape: sh, A, B: height, DBL, temple: temple || 140,
+    rim: mat === "acetate" ? 4.5 : 1.3, material: mat, weightG: Math.round(A * GRAMS_PER_MM[mat]),
+    pads: mat === "acetate" ? "fixed" : "adjustable", colorway: COLORWAYS[mat], priceUsd: 0, faceShapes: [],
+  };
+}
+
+let custom; // the frame the shopper typed in (persisted by the app store)
+export function setCustomFrame(spec) { custom = spec ? customFrame(spec) : undefined; }
+
+export const getFrame = (id) => (id === "custom" ? custom : FRAMES.find((f) => f.id === id));
 
 const spow = (v, p) => Math.sign(v) * Math.abs(v) ** p;
 

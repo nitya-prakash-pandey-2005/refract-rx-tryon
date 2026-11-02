@@ -42,8 +42,8 @@ function StudioInner({ s, frameId }) {
   const [t, setT] = useState(0);
   const pd = { left: s.measure.pd.left, right: s.measure.pd.right };
   const ranked = useMemo(
-    () => rankFrames({ rx: s.rx, pd, faceWidthMm: s.measure.faceWidthMm, faceShape: s.faceAttr?.faceShape }),
-    [rxKey(s.rx), pd.left, pd.right, s.measure.faceWidthMm, s.faceAttr?.faceShape], // eslint-disable-line react-hooks/exhaustive-deps
+    () => rankFrames({ rx: s.rx, pd, faceWidthMm: s.measure.faceWidthMm, faceShape: s.faceAttr?.faceShape }, getFrame("custom") ? [getFrame("custom"), ...FRAMES] : FRAMES),
+    [rxKey(s.rx), pd.left, pd.right, s.measure.faceWidthMm, s.faceAttr?.faceShape, s.customFrame], // eslint-disable-line react-hooks/exhaustive-deps
   );
   const frame = getFrame(frameId) || getFrame(s.lastFrame) || ranked[0].frame;
   const fit = ranked.find((r) => r.frame.id === frame.id).fit;
@@ -109,7 +109,7 @@ function StudioInner({ s, frameId }) {
   const addToBag = () => {
     setStore((st) => ({ bag: [...st.bag.filter((b) => b.kind !== "frame"), { kind: "frame", id: frame.id, name: `${frame.name} · ${frame.colorway.name}`, priceUsd: frame.priceUsd, lens: { n: index.n, label: index.label, priceUsd: index.priceUsd, maxEdge, weightG: weight }, rx: st.rx, pd: st.measure.pd }] }));
     const sent = sendToStore({ id: frame.id, name: frame.name, priceUsd: frame.priceUsd, lens: { n: index.n, label: index.label, priceUsd: index.priceUsd, maxEdge, weightG: weight } });
-    toast(sent ? `${frame.name} with ${index.label} lenses sent to the store cart.` : `${frame.name} with ${index.label} lenses added to your bag.`, "ok");
+    toast(sent ? `${frame.name} with ${index.label} lenses sent to the store cart.` : `${frame.name} with ${index.label} lenses saved to your shortlist.`, "ok");
   };
   const makeCard = async () => {
     const blob = await renderCard({
@@ -123,7 +123,7 @@ function StudioInner({ s, frameId }) {
   };
   const addLook = () => {
     setStore((st) => ({ bag: [...st.bag.filter((b) => b.kind !== "makeup"), ...rxLook.products.map((p) => ({ kind: "makeup", ...p }))] }));
-    toast(`${rxLook.name} look products added to your bag.`, "ok");
+    toast(`${rxLook.name} look products saved to your shortlist.`, "ok");
   };
 
   return (

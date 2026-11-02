@@ -3,7 +3,7 @@ import { uploadImage, createTask, pollTask, credit, imageMime, YouCamError } fro
 import { unitCost } from "../src/engine/youcam.js";
 import { runAgent, llmProvider } from "./agent.js";
 import { allow, buildParams, budgetLeft, spend } from "./limits.js";
-import { FRAMES, getFrame } from "../src/engine/frames.js";
+import { FRAMES, getFrame, parseFrameSize, customFrame } from "../src/engine/frames.js";
 import { remakeRisk } from "../src/engine/risk.js";
 import { sanitizeRx, parseDiopter, RANGES } from "../src/engine/rxinput.js";
 
@@ -83,8 +83,14 @@ function riskApi(body) {
   const face = { faceWidthMm: Number(body.face?.faceWidthMm) || undefined, noseWidthMm: Number(body.face?.noseWidthMm) || undefined, bridge: ["low", "medium", "high"].includes(body.face?.bridge) ? body.face.bridge : "medium" };
   const oil = Number(body.oiliness);
   const oiliness = body.oiliness != null && Number.isFinite(oil) ? Math.max(0, Math.min(100, oil)) : 60;
+  if (body.frame && typeof body.frame === "object") {
+    const size = body.frame.size != null ? parseFrameSize(body.frame.size) : parseFrameSize(`${body.frame.A}-${body.frame.DBL}`);
+    if (!size) throw new YouCamError("Send frame as { size: \"52-18-140\", shape, material } (lens width 33-66 mm, bridge 12-26 mm).", "BadFrame", 400);
+    const frame = customFrame({ ...size, B: body.frame.B, shape: body.frame.shape, material: body.frame.material });
+    return { frameId: "custom", size: `${frame.A}-${frame.DBL}-${frame.temple}`, ...publicRisk(remakeRisk({ frame, rx, pd, face, oiliness })) };
+  }
   if (body.frameId) {
-    const frame = getFrame(body.frameId);
+    const frame = body.frameId === "custom" ? undefined : getFrame(body.frameId);
     if (!frame) throw new YouCamError(`Unknown frameId: ${body.frameId}`, "BadFrame", 400);
     return { frameId: frame.id, ...publicRisk(remakeRisk({ frame, rx, pd, face, oiliness })) };
   }

@@ -5,7 +5,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
-import { FRAMES, getFrame } from "../src/engine/frames.js";
+import { FRAMES, getFrame, SHAPES, parseFrameSize, customFrame } from "../src/engine/frames.js";
 import { lensPair } from "../src/engine/fit.js";
 import { remakeRisk } from "../src/engine/risk.js";
 import { materialSight } from "../src/engine/sight.js";
@@ -64,6 +64,25 @@ server.registerTool("lens_report", {
   const { rx, pd } = ctx(a);
   const p = lensPair({ frame, rx, pd });
   return json({ frame_id: frame.id, index: p.best.label, edge_mm: +Math.max(p.od.maxEdge, p.os.maxEdge).toFixed(1), centre_mm: +Math.max(p.od.centre, p.os.centre).toFixed(1), lens_weight_g: +(p.od.weightG + p.os.weightG).toFixed(1), eye_size_change_pct: +(((p.od.magnification.mean + p.os.magnification.mean) / 2 - 1) * 100).toFixed(1), note: p.note });
+});
+
+server.registerTool("check_any_frame", {
+  title: "Check any frame from any store",
+  description: "Remake risk and lens thickness for ANY frame on the internet, from the size printed inside its temple arm (lens width, bridge, temple, e.g. \"52□18 140\") and its shape and material. Use it when the shopper is looking at a frame outside the Refract catalogue.",
+  inputSchema: {
+    ...rxShape, ...faceShape,
+    size: z.string().describe("Frame size as printed on the arm or in the listing, e.g. \"52-18-140\""),
+    shape: z.enum(SHAPES).optional().describe("Lens shape (default rect)"),
+    material: z.enum(["acetate", "metal", "titanium"]).optional().describe("Frame material; metal and titanium frames have adjustable nose pads"),
+    lens_height_mm: z.number().optional().describe("Lens height (B) if the listing gives it"),
+  },
+}, async (a) => {
+  const size = parseFrameSize(a.size);
+  if (!size) return { isError: true, content: [{ type: "text", text: `Could not read the frame size "${a.size}". Expected lens width 33-66 mm and bridge 12-26 mm, like "52-18-140".` }] };
+  const frame = customFrame({ ...size, B: a.lens_height_mm, shape: a.shape, material: a.material });
+  const c = ctx(a);
+  const p = lensPair({ frame, rx: c.rx, pd: c.pd });
+  return json({ size: `${frame.A}-${frame.DBL}-${frame.temple}`, lens_height_mm: frame.B, edge_mm: +Math.max(p.od.maxEdge, p.os.maxEdge).toFixed(1), ...brief(remakeRisk({ frame, ...c })) });
 });
 
 server.registerTool("sight_by_material", {

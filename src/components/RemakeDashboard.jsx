@@ -7,7 +7,7 @@ import { countUp } from "../lib/anim";
 
 const PARTS = [["look", "Look"], ["sight", "Sight"], ["fit", "Fit (slip)"], ["measure", "Measure (PD)"]];
 const PLANS = [
-  { name: "Starter", price: 49, checks: "2,000 checks / mo", items: ["Live Rx Mirror embed", "Fit Check on product pages", "Remake-risk badge per order"] },
+  { name: "Starter", price: 49, checks: "2,000 checks / mo", items: ["Live Rx Mirror embed", "Remake-risk check on product pages", "Remake-risk badge per order"] },
   { name: "Growth", price: 199, checks: "15,000 checks / mo", items: ["Everything in Starter", "Order-risk dashboard + exports", "REST API + YouCam beauty layer"], best: true },
   { name: "Enterprise", price: null, checks: "Unlimited", items: ["MCP server for AI shopping agents", "Lab / LMS integration", "Custom frame catalogue sync"] },
 ];
@@ -114,11 +114,14 @@ export default function RemakeDashboard() {
   "frameId": "juno", "pd": { "left": 31.5, "right": 31.5, "plusMinus": 2.7 },
   "face": { "faceWidthMm": 128, "noseWidthMm": 13.5, "bridge": "low" },
   "oiliness": 40 }      // from YouCam Skin AI
-→ { "score": 89, "level": "high", "parts": { look, sight, fit, measure }, "fixes": [ … ] }`}</pre>
+→ { "score": 89, "level": "high", "parts": { look, sight, fit, measure }, "fixes": [ … ] }
+
+// any frame on the internet, by the size printed on its arm:
+{ "rx": …, "frame": { "size": "52-18-140", "shape": "rect", "material": "metal" } }`}</pre>
           <div className="row wrap" style={{ gap: 8 }}>
             <button className="btn primary sm" onClick={tryApi} disabled={api?.loading}>{api?.loading ? <Loader2 size={15} className="spin" /> : <Play size={15} />}Try the live API</button>
             <a className="btn sm ghost" href="/store/index.html">Embed demo store</a>
-            <span className="tiny muted">GET /api/v1/frames · POST /api/v1/risk (no frameId = rank the catalogue)</span>
+            <span className="tiny muted">GET /api/v1/frames · POST /api/v1/risk (frameId, any frame by size, or none = rank the catalogue)</span>
           </div>
           {api?.json && <pre className="json snippet api-out">{`// ${api.ms} ms\n${JSON.stringify(api.json, null, 2)}`}</pre>}
         </Card>
@@ -128,8 +131,9 @@ export default function RemakeDashboard() {
     "command": "node",
     "args": ["server/mcp.js"] } } }
 
-tools: rank_frames · remake_risk
-       lens_report · sight_by_material`}</pre>
+tools: check_any_frame · rank_frames
+       remake_risk · lens_report
+       sight_by_material`}</pre>
         </Card>
       </div>
     </>

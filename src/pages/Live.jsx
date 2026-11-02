@@ -4,7 +4,7 @@ import { Card, PageHead, Hud, Badge, Seg, Toggle, toast } from "../ui";
 import { useStore, setStore } from "../state/store";
 import { navigate } from "../lib/router";
 import { tween } from "../lib/anim";
-import { getFrame } from "../engine/frames";
+import { FRAMES, getFrame } from "../engine/frames";
 import { rankFrames } from "../engine/fit";
 import { measureFace, faceTurned, widestFace } from "../engine/measure";
 import { placeFrame, lensUniforms } from "../engine/placement";
@@ -35,7 +35,7 @@ export default function Live({ parts }) {
   const [hud, setHud] = useState({ fps: 0, pd: null, face: false, turned: false });
 
   const pd = s.measure ? { left: s.measure.pd.left, right: s.measure.pd.right } : { left: 31.5, right: 31.5 };
-  const ranked = useMemo(() => rankFrames({ rx: s.rx, pd, faceWidthMm: s.measure?.faceWidthMm, faceShape: s.faceAttr?.faceShape }), [JSON.stringify(s.rx), pd.left, pd.right]); // eslint-disable-line react-hooks/exhaustive-deps
+  const ranked = useMemo(() => rankFrames({ rx: s.rx, pd, faceWidthMm: s.measure?.faceWidthMm, faceShape: s.faceAttr?.faceShape }, getFrame("custom") ? [getFrame("custom"), ...FRAMES] : FRAMES), [JSON.stringify(s.rx), pd.left, pd.right, s.customFrame]); // eslint-disable-line react-hooks/exhaustive-deps
   const frame = getFrame(parts[1]) || getFrame(s.lastFrame) || ranked[0].frame;
   const fit = ranked.find((r) => r.frame.id === frame.id).fit;
   const eyeChange = ((fit.lens.od.magnification.mean + fit.lens.os.magnification.mean) / 2 - 1) * 100;
@@ -126,7 +126,7 @@ export default function Live({ parts }) {
     const lens = { n: fit.lens.best.n, label: fit.lens.best.label, priceUsd: fit.lens.best.priceUsd, maxEdge: Math.max(fit.lens.od.maxEdge, fit.lens.os.maxEdge), weightG: fit.lens.od.weightG + fit.lens.os.weightG };
     if (sendToStore({ id: frame.id, name: frame.name, priceUsd: frame.priceUsd, lens })) return toast(`${frame.name} sent to the store cart.`, "ok");
     setStore((st) => ({ bag: [...st.bag.filter((b) => b.kind !== "frame"), { kind: "frame", id: frame.id, name: `${frame.name} · ${frame.colorway.name}`, priceUsd: frame.priceUsd, lens, rx: st.rx, pd: st.measure?.pd }] }));
-    toast(`${frame.name} with ${lens.label} lenses added to your bag.`, "ok");
+    toast(`${frame.name} with ${lens.label} lenses saved to your shortlist.`, "ok");
   }
 
   // Keep the camera running until the snapshot is accepted, so a bad frame costs nothing.
@@ -204,7 +204,7 @@ export default function Live({ parts }) {
             </div>
             <p className="small text-2" style={{ marginTop: 10 }}>{fit.lens.note}</p>
             <div className="stack-sm" style={{ marginTop: 6 }}>
-              <button className="btn primary block" onClick={addToCart}>{isEmbed() ? "Add to store cart" : "Add frame + lenses to bag"}</button>
+              <button className="btn primary block" onClick={addToCart}>{isEmbed() ? "Add to store cart" : "Save frame + lenses to my shortlist"}</button>
               <a className="btn block ghost" href="#/rx">Change prescription</a>
             </div>
           </Card>
