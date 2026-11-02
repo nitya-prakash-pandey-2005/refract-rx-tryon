@@ -4,7 +4,7 @@
 
 Refract is a web app (it also installs as a phone app) for people who wear glasses. It renders you **live, through your exact prescription**: a GPU shader re-samples your camera through each lens every frame, so you see how much smaller or bigger your eyes look to others, the edge thickness, and the "cut-in" at the lens rim, with frames tracking your face. It ranks frames and lens index for your Rx, uses **YouCam AI APIs** to retune your eye makeup for your lenses, and drops into **any eyewear store with one script tag**.
 
-![Live Rx Mirror with Optics X-ray](docs/screenshots/03-live-optics-xray.png)
+![Refract: see yourself through your real prescription](docs/screenshots/00-cover.png)
 
 Built for the *YouCam API Skin AI & eCommerce VTO Hackathon* (eCommerce VTO track: beauty and eyewear as one look).
 
