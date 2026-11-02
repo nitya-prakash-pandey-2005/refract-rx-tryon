@@ -25,7 +25,7 @@ for (const r of list) {
   for (const [w, h, tag] of [[1440, 1000, "desktop"], [390, 844, "phone"]]) {
     await page.setViewport({ width: w, height: h, deviceScaleFactor: 1 });
     await page.goto(`${BASE}/#${r}`, { waitUntil: "networkidle0" });
-    await new Promise((res) => setTimeout(res, r.startsWith("/studio") ? 3200 : 1200));
+    await new Promise((res) => setTimeout(res, r.startsWith("/studio") ? 3200 : r === "/" ? 4200 : 1200));
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1);
     const name = `${outDir}/${(r.replace(/\//g, "_") || "_home").replace(/^_/, "") || "home"}-${tag}.png`;
     await page.screenshot({ path: name, fullPage: tag === "desktop" ? false : false });

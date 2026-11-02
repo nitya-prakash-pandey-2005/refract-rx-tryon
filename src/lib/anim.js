@@ -39,3 +39,24 @@ export function tween(from, to, onUpdate, { duration = 1400, ease = "inOutCubic"
   const o = { t: from };
   return animate(o, { t: to, duration, ease, onUpdate: () => onUpdate(o.t), onComplete });
 }
+
+// Run fn once when the element scrolls into view (anime.js animations start then).
+export function onView(el, fn, threshold = 0.25) {
+  if (!el) return () => {};
+  if (typeof IntersectionObserver === "undefined") { fn(); return () => {}; }
+  const io = new IntersectionObserver((entries) => {
+    if (entries.some((e) => e.isIntersecting)) { io.disconnect(); fn(); }
+  }, { threshold });
+  io.observe(el);
+  return () => io.disconnect();
+}
+
+// Reveal children of a section with a stagger when it scrolls into view.
+export function useScrollReveal(ref, selector = "[data-reveal]") {
+  useEffect(() => {
+    const root = ref.current;
+    if (!root) return;
+    const cleanups = [...root.querySelectorAll("[data-section]")].map((sec) => onView(sec, () => reveal(sec, selector)));
+    return () => cleanups.forEach((c) => c());
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+}
