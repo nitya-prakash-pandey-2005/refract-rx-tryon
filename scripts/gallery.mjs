@@ -2,7 +2,7 @@
 // screenshot in story order to docs/screenshots. A Y4M clip stands in for the webcam.
 // Usage: node scripts/gallery.mjs <face.y4m> [outDir]
 import puppeteer from "puppeteer-core";
-import { mkdirSync, readFileSync } from "node:fs";
+import { mkdirSync, readFileSync, rmSync } from "node:fs";
 
 const [y4m, out = "docs/screenshots"] = process.argv.slice(2);
 const B = process.env.BASE || "http://localhost:5190";
@@ -120,5 +120,6 @@ await p.setContent(`<html><body style="${bg};width:1280px;height:640px">${glow}
 </body></html>`); await wait(300);
 await shot("00-cover");
 
+for (const tmp of [".qc.png", ".ph1.png", ".ph2.png", ".ph3.png"]) rmSync(`${out}/${tmp}`, { force: true });
 console.log(errs.length ? `errors:\n${[...new Set(errs)].join("\n")}` : "gallery done, no errors");
 await b.close();
