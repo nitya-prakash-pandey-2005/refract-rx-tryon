@@ -56,7 +56,7 @@ Sources gathered on 2026-11-02. Old or vendor figures are labelled; inferred val
 ## Physics and standards used
 - **Prentice's rule:** prism (Δ) = decentration (cm) × power (D).
 - **Transverse chromatic aberration:** TCA = prism ÷ Abbe number.
-  - Abbe numbers: CR-39 58; polycarbonate about 30; 1.60 about 42; 1.67 about 32; 1.74 about 33.
+  - Abbe numbers: CR-39 58; polycarbonate about 30; 1.60 about 41; 1.67 about 32; 1.74 about 32.
   - At 5 Δ off-axis, polycarbonate spreads about 0.17 Δ of colour against 0.09 Δ for CR-39. [20/20 "Crossing Abbe Road"](https://www.2020mag.com/article/crossing-abbe-road)
 - **ANSI Z80.1:** unwanted horizontal prism ≤ 0.67 Δ.
 - **Spectacle magnification:** power factor 1/(1 − d·F), with d ≈ 12 mm vertex.

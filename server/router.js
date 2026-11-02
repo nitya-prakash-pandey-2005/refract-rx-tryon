@@ -5,7 +5,7 @@ import { runAgent, llmProvider } from "./agent.js";
 import { allow, buildParams, budgetLeft, spend } from "./limits.js";
 import { FRAMES, getFrame } from "../src/engine/frames.js";
 import { remakeRisk } from "../src/engine/risk.js";
-import { sanitizeRx } from "../src/engine/rxinput.js";
+import { sanitizeRx, parseDiopter, RANGES } from "../src/engine/rxinput.js";
 
 const FEATURES = new Set(["face-attr-analysis", "skin-analysis", "makeup-vto"]);
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
@@ -76,11 +76,13 @@ async function record(feature, label, params, results) {
 // Public optics API (v1): the same engine the app uses, for stores and AI agents.
 const publicRisk = (r) => ({ score: r.score, level: r.level, fixes: r.fixes, lensIndex: r.lens.best.label, parts: Object.fromEntries(Object.entries(r.parts).map(([k, p]) => [k, { level: p.level, headline: p.headline, fix: p.fix }])) });
 function riskApi(body) {
-  if (!body.rx || typeof body.rx !== "object" || !body.rx.od || !body.rx.os) throw new YouCamError("Send rx as { od: { sph, cyl, axis }, os: { sph, cyl, axis } }.", "BadRx", 400);
+  const eyeOk = (e) => e && typeof e === "object" && !Array.isArray(e) && parseDiopter(e.sph, RANGES.sph) !== null && (e.cyl == null || parseDiopter(e.cyl, RANGES.cyl) !== null);
+  if (!body.rx || typeof body.rx !== "object" || !eyeOk(body.rx.od) || !eyeOk(body.rx.os)) throw new YouCamError("Send rx as { od: { sph, cyl, axis }, os: { sph, cyl, axis } } with numeric powers in dioptres.", "BadRx", 400);
   const rx = sanitizeRx(body.rx);
   const pd = { left: Number(body.pd?.left) || 31.5, right: Number(body.pd?.right) || 31.5, plusMinus: Number(body.pd?.plusMinus) || 2.5 };
   const face = { faceWidthMm: Number(body.face?.faceWidthMm) || undefined, noseWidthMm: Number(body.face?.noseWidthMm) || undefined, bridge: ["low", "medium", "high"].includes(body.face?.bridge) ? body.face.bridge : "medium" };
-  const oiliness = Math.max(1, Math.min(100, Number(body.oiliness) || 60));
+  const oil = Number(body.oiliness);
+  const oiliness = body.oiliness != null && Number.isFinite(oil) ? Math.max(0, Math.min(100, oil)) : 60;
   if (body.frameId) {
     const frame = getFrame(body.frameId);
     if (!frame) throw new YouCamError(`Unknown frameId: ${body.frameId}`, "BadFrame", 400);
@@ -100,7 +102,7 @@ export async function handle(req, res) {
     try { body = typeof req.body === "string" ? JSON.parse(req.body || "{}") : req.body || {}; } catch { throw new YouCamError("Invalid JSON body.", "BadJson", 400); }
     if (path === "/api/health") return send(res, 200, { youcam: Boolean(process.env.YOUCAM_API_KEY), llm: llmProvider() });
 
-    if (path === "/api/v1/frames") return send(res, 200, { frames: FRAMES.map(({ id, name, shape, A, B, DBL, temple, weightG, pads, material, priceUsd }) => ({ id, name, shape, A, B, DBL, temple, weightG, pads, material, priceUsd })) });
+    if (path === "/api/v1/frames" && req.method === "GET") return send(res, 200, { frames: FRAMES.map(({ id, name, shape, A, B, DBL, temple, weightG, pads, material, priceUsd }) => ({ id, name, shape, A, B, DBL, temple, weightG, pads, material, priceUsd })) });
 
     if (path === "/api/v1/risk" && req.method === "POST") {
       if (!allow(`api:${ipOf(req)}`, { limit: 120, windowMs: 10 * 60 * 1000 })) throw TOO_MANY();

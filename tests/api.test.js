@@ -35,3 +35,19 @@ test("POST /api/v1/risk rejects a bad prescription", async () => {
   const r = await call("POST", "/api/v1/risk", { rx: "minus seven" });
   assert.equal(r.status, 400);
 });
+
+test("POST /api/v1/risk rejects unparsable powers instead of treating them as plano", async () => {
+  assert.equal((await call("POST", "/api/v1/risk", { rx: { od: "x", os: [] } })).status, 400);
+  assert.equal((await call("POST", "/api/v1/risk", { rx: { od: { sph: "-7.00 D" }, os: { sph: -7 } } })).status, 400);
+});
+
+test("oiliness 0 (oiliest) is respected, not replaced by the default", async () => {
+  const body = (o) => ({ rx: { od: { sph: -4, cyl: 0, axis: 0 }, os: { sph: -4, cyl: 0, axis: 0 } }, frameId: "juno", oiliness: o });
+  const oily = await call("POST", "/api/v1/risk", body(0)), dflt = await call("POST", "/api/v1/risk", body(60));
+  assert.ok(oily.json.score >= dflt.json.score);
+  assert.notDeepEqual(oily.json.parts.fit, dflt.json.parts.fit);
+});
+
+test("GET only on /api/v1/frames", async () => {
+  assert.equal((await call("DELETE", "/api/v1/frames")).status, 404);
+});

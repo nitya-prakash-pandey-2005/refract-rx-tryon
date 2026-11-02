@@ -52,3 +52,34 @@ test("nose pressure flags marks above the capillary threshold", () => {
   const r = slipRisk({ frame: juno, lensWeightG: 30, face, oiliness: 50 });
   assert.ok(["ok", "marks", "painful"].includes(r.pressureLevel));
 });
+
+test("eye-level face width is not head width: normal frames keep temple grip", () => {
+  const r = slipRisk({ frame: juno, lensWeightG: 8, face: { faceWidthMm: 130, noseWidthMm: 13.5, bridge: "medium" }, oiliness: 60, power: 1 });
+  assert.notEqual(r.level, "high");
+  assert.ok(r.inputs.gripN >= 0.1);
+});
+
+test("weight fix is not suggested for plano lenses", () => {
+  const r = slipRisk({ frame: juno, lensWeightG: 16, face, oiliness: 60, power: 0 });
+  assert.ok(!r.fixes.some((f) => /higher-index/.test(f)));
+});
+
+test("sight fix only suggests materials with a higher Abbe than the lens chosen", () => {
+  const rx = { od: { sph: -5, cyl: 0, axis: 0 }, os: { sph: -5, cyl: 0, axis: 0 } };
+  const r = remakeRisk({ frame: nori, rx, pd: { left: 31.5, right: 31.5, plusMinus: 0.5 }, face, oiliness: 60, index: { n: 1.6, label: "1.60 Thin", density: 1.3, abbe: 41, minCenter: 1.5, priceUsd: 49 } });
+  if (r.parts.sight.fix) assert.doesNotMatch(r.parts.sight.fix, /1\.60/);
+});
+
+test("a frame without a weight does not produce NaN", () => {
+  const { weightG, ...noWeight } = juno;
+  const r = remakeRisk({ frame: noWeight, rx: { od: { sph: -3, cyl: 0, axis: 0 }, os: { sph: -3, cyl: 0, axis: 0 } }, pd: { left: 31.5, right: 31.5, plusMinus: 2.7 }, face, oiliness: 60 });
+  assert.ok(Number.isFinite(r.score));
+});
+
+test("physics ordering: heavy acetate on a low, oily nose slides; light pad frames stay put", () => {
+  const ines = FRAMES.find((f) => f.id === "ines");
+  const bad = slipRisk({ frame: ines, lensWeightG: 18, face: { faceWidthMm: 126, noseWidthMm: 12.5, bridge: "low" }, oiliness: 30, power: 5 });
+  const good = slipRisk({ frame: nori, lensWeightG: 14, face: { faceWidthMm: 128, noseWidthMm: 13, bridge: "low" }, oiliness: 25, power: 7 });
+  assert.equal(bad.level, "high");
+  assert.equal(good.level, "low");
+});

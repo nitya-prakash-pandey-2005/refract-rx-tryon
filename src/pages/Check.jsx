@@ -36,8 +36,8 @@ export default function Check({ parts }) {
   const risk = useMemo(() => remakeRisk({ frame, rx: s.rx, pd, face, oiliness: oil, index }), [frame.id, JSON.stringify(s.rx), indexN, bridge, oil, pdKnown, s.measure]); // eslint-disable-line react-hooks/exhaustive-deps
   const asOrdered = useMemo(() => remakeRisk({ frame, rx: s.rx, pd: basePd, face: { ...face, bridge: s.bridge || "medium" }, oiliness: s.skin?.oiliness ?? 60 }), [frame.id, JSON.stringify(s.rx), s.measure]); // eslint-disable-line react-hooks/exhaustive-deps
   const ranked = useMemo(() => FRAMES.map((f) => ({ f, r: remakeRisk({ frame: f, rx: s.rx, pd, face, oiliness: oil, index }) })).sort((a, b) => a.r.score - b.r.score), [JSON.stringify(s.rx), indexN, bridge, oil, pdKnown, s.measure]); // eslint-disable-line react-hooks/exhaustive-deps
-  const sightRows = materialSight(s.rx.od.sph * s.rx.od.sph >= s.rx.os.sph * s.rx.os.sph ? s.rx.od : s.rx.os);
   const strongest = Math.max(Math.abs(s.rx.od.sph), Math.abs(s.rx.os.sph), Math.abs(s.rx.od.sph + s.rx.od.cyl), Math.abs(s.rx.os.sph + s.rx.os.cyl));
+  const sightRows = materialSight({ sph: strongest, cyl: 0, axis: 0 }); // same power as the simulator
   useReveal(root, []);
   useEffect(() => { countUp(scoreEl.current, risk.score, { duration: 700 }); }, [risk.score]);
   useEffect(() => { setStore({ lastFrame: frame.id }); }, [frame.id]);
@@ -112,7 +112,7 @@ export default function Check({ parts }) {
         <Card className="span-5" title="Fit: will they slide?" icon={GaugeIcon} right={<Hud tone="pink">physics</Hud>} data-reveal>
           <SlipDiagram slip={slip} />
           <Drivers drivers={slip.drivers.map((d, i) => ({ ...d, feature: String(i) }))} max={0.5} />
-          <p className="tiny muted" style={{ marginTop: 8 }}>Slip margin = grip ÷ load: friction on the nose pads (lower on oily skin) plus ear and temple hold, against weight on a {30}° nasal slope with head movement. Below 1× they creep down.</p>
+          <p className="tiny muted" style={{ marginTop: 8 }}>Slip margin = grip ÷ load: friction on the nose pads (lower on oily skin) plus ear and temple hold, against weight on the nasal slope while you look down at your phone (30° + 20° head tilt), with head movement. Below 1× they creep down.</p>
           <div className="row wrap" style={{ gap: 8, marginTop: 8 }}>
             <Badge tone="cyan"><Droplets size={12} /> μ {slip.inputs.frictionCoeff.toFixed(2)}</Badge>
             <Badge tone="muted">{slip.pressureKPa.toFixed(1)} kPa on the nose</Badge>

@@ -28,7 +28,7 @@ A remake-risk score from four models, each explained and each with a fix:
 |---|---|---|
 | **Look** | Edge or centre thickness around the real frame shape, decentred to your PD, plus how much smaller or bigger your eyes look to others | Lens sag + spectacle magnification |
 | **Sight** | Colour fringes for every lens material: a colour-clean zone and *chart lines of sharpness lost* at a 10 mm glance | Prentice's rule, Abbe number, Winter et al. *JOSA A* 2015 |
-| **Fit** | Will they slide down your nose? | Physics: frame + lens weight (from your Rx) under head movement, against grip from pad friction, ear hold and temple clamp. **Pad friction drops on oily skin, measured by YouCam Skin AI.** Silicone pads lose about 15% grip on oily skin; hard acetate loses about 40% (skin-tribology studies). Nose width at pad height comes from your photo. Pressure marks flagged above capillary pressure. |
+| **Fit** | Will they slide down your nose? | Physics, evaluated while you look down at your phone: frame + lens weight (from your Rx) under head movement, against grip from pad friction, ear hold and temple friction. **Pad friction drops on oily skin, measured by YouCam Skin AI.** Silicone pads lose about 15% grip on oily skin; hard acetate loses about 40% (skin-tribology studies). Nose width at pad height comes from your photo. Pressure marks flagged above capillary pressure. |
 | **Measure** | Can your PD be trusted at your power? | Prism induced by PD uncertainty vs the ANSI Z80.1 0.67 Δ tolerance |
 
 What-if controls (lens material, nose bridge, oiliness, known PD) move the score live. The **Sight simulator** shows a street scene through each material, fringes and all.
@@ -52,7 +52,7 @@ A WebGL2 shader re-renders your camera through your exact sphere, cylinder and a
 - **REST API:** `POST /api/v1/risk` scores one frame, or ranks the catalogue.
 - **MCP server:** AI shopping agents (Claude, ChatGPT) get Rx-aware tools: `rank_frames`, `remake_risk`, `lens_report`, `sight_by_material`. Existing eyewear MCP servers only do cart and checkout.
 - **Retailer dashboard:**
-  - a simulated order stream: 11% of orders are high risk, and Refract's fixes cut high-risk orders from 33 to 13 (−61%) and average risk by 37%;
+  - a simulated order stream: 8.7% of orders are high risk, and Refract's fixes cut high-risk orders from 26 to 7 (−73%) and average risk by 39%;
   - an ROI calculator (7.6% redo rate × $90 per remake);
   - pricing at $49 / $199 / custom per store.
 - **Catalogue Rx audit** and an Rx-suitability feed.
@@ -83,7 +83,7 @@ A WebGL2 shader re-renders your camera through your exact sphere, cylinder and a
 
 **Rendering:** MediaPipe Face Landmarker (478 points with irises) with smoothing; a WebGL2 lens shader; Canvas 2D for frames, X-ray and the Sight simulator; **anime.js** for all motion.
 
-**Quality:** 74 automated tests, including a real MCP client calling our server and API route tests. Three independent code reviews, with every finding fixed test-first. Headless-Chrome end-to-end runs.
+**Quality:** 83 automated tests, including a real MCP client calling our server and API route tests. Three independent code reviews, with every finding fixed test-first. Headless-Chrome end-to-end runs.
 
 ## Challenges
 

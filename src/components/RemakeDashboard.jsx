@@ -11,10 +11,12 @@ const PLANS = [
   { name: "Growth", price: 199, checks: "15,000 checks / mo", items: ["Everything in Starter", "Order-risk dashboard + exports", "REST API + YouCam beauty layer"], best: true },
   { name: "Enterprise", price: null, checks: "Unlimited", items: ["MCP server for AI shopping agents", "Lab / LMS integration", "Custom frame catalogue sync"] },
 ];
-const fmt = (v) => `$${Math.round(v).toLocaleString("en-US")}`;
+const fmt = (v) => `${Math.round(v).toLocaleString("en-US")}`;
+let cached = null; // the seeded simulation is deterministic: run it once per session
 
 export default function RemakeDashboard() {
-  const [data, setData] = useState(null);
+  const [data, setData] = useState(cached);
+  const [addressable, setAddressable] = useState(30);
   const [orders, setOrders] = useState(2000);
   const [remakeRate, setRemakeRate] = useState(7.6);
   const [cost, setCost] = useState(90);
@@ -23,8 +25,9 @@ export default function RemakeDashboard() {
   const highEl = useRef(null), dropEl = useRef(null);
 
   useEffect(() => {
+    if (cached) return;
     const w = new Worker(new URL("../workers/sim.worker.js", import.meta.url), { type: "module" });
-    w.onmessage = (e) => { setData(e.data); w.terminate(); };
+    w.onmessage = (e) => { cached = e.data; setData(e.data); w.terminate(); };
     w.postMessage({ n: 300, seed: 7 });
     return () => w.terminate();
   }, []);
@@ -32,7 +35,7 @@ export default function RemakeDashboard() {
   const s = data?.summary;
   const highPct = s ? (s.levels.high / s.n) * 100 : 0;
   const drop = s ? (1 - s.avgScoreFixed / s.avgScore) * 100 : 0;
-  const prevented = orders * (remakeRate / 100) * (drop / 100);
+  const prevented = orders * (remakeRate / 100) * (addressable / 100) * (drop / 100);
   const savings = prevented * cost;
   useEffect(() => { if (s) { countUp(highEl.current, highPct, { decimals: 0 }); countUp(dropEl.current, drop, { decimals: 0 }); } }, [s]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -79,13 +82,14 @@ export default function RemakeDashboard() {
         <Card className="span-5" title="What it's worth to you" icon={Calculator} data-reveal>
           <div className="stack-sm">
             <label className="field"><span className="small row between">Prescription orders per month <b className="num">{orders.toLocaleString()}</b></span><input className="slider" type="range" min="200" max="20000" step="100" value={orders} onChange={(e) => setOrders(+e.target.value)} /></label>
-            <label className="field"><span className="small row between">Remake rate <b className="num">{remakeRate}%</b></span><input className="slider" type="range" min="2" max="15" step="0.1" value={remakeRate} onChange={(e) => setRemakeRate(+e.target.value)} /><span className="tiny muted">7.6% industry average (Vision Council survey)</span></label>
+            <label className="field"><span className="small row between">Remake rate <b className="num">{remakeRate}%</b></span><input className="slider" type="range" min="2" max="15" step="0.1" value={remakeRate} onChange={(e) => setRemakeRate(+e.target.value)} /><span className="tiny muted">7.6% industry average (Vision Council surveys, 2012)</span></label>
+            <label className="field"><span className="small row between">Remakes this can prevent <b className="num">{addressable}%</b></span><input className="slider" type="range" min="10" max="60" step="1" value={addressable} onChange={(e) => setAddressable(+e.target.value)} /><span className="tiny muted">measurement errors are 13% of redos, non-adapts and failed AR about 6%, plus fit and cosmetic returns; Rx and lab errors are out of scope</span></label>
             <label className="field"><span className="small row between">Full cost per remake <b className="num">${cost}</b></span><input className="slider" type="range" min="20" max="250" step="5" value={cost} onChange={(e) => setCost(+e.target.value)} /><span className="tiny muted">lab $17–64 per redo × 2–3 for staff, shipping and goodwill</span></label>
             <div className="divider" />
             <div className="row between"><span className="small">Remakes avoided / month</span><b className="num">{s ? Math.round(prevented) : "…"}</b></div>
             <div className="row between"><span className="small">Saved / month</span><b className="display-sm" style={{ color: "var(--green)" }}>{s ? fmt(savings) : "…"}</b></div>
             <div className="row between"><span className="small">Return on a ${plan}/mo plan</span><Badge tone="green">{s ? `${Math.max(0, savings / plan).toFixed(0)}×` : "…"}</Badge></div>
-            <p className="tiny muted">Model assumption: remake likelihood scales with the risk score, so avoided remakes = orders × remake rate × the simulated risk reduction ({s ? drop.toFixed(0) : "…"}%).</p>
+            <p className="tiny muted">Model assumption: within the preventable share, remake likelihood scales with the risk score, so avoided remakes = orders × remake rate × preventable share × simulated risk reduction ({s ? drop.toFixed(0) : "…"}%).</p>
           </div>
         </Card>
       </div>

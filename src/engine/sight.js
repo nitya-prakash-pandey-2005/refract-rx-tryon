@@ -38,6 +38,6 @@ export function materialSight(rx, glanceMm = 10) {
       : t < TCA_THRESHOLD ? "Clean: no visible colour fringes at a normal side glance."
       : t < TCA_THRESHOLD * 1.6 ? "Faint fringes when you look sideways through the lens edge."
       : "Visible rainbow edges when you glance sideways; many people notice this.";
-    return { index, abbe: index.abbe, cleanZoneMm: Math.min(2 * r, 99), tcaAt10mm: t, fringeArcmin: fringeArcmin(t), linesLost: acuityLossLines(prismAt(strongest, glanceMm), index.abbe), verdict };
+    return { index, abbe: index.abbe, cleanZoneMm: r === Infinity ? Infinity : Math.min(2 * r, 99), tcaAt10mm: t, fringeArcmin: fringeArcmin(t), linesLost: acuityLossLines(prismAt(strongest, glanceMm), index.abbe), verdict };
   });
 }

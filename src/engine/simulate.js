@@ -39,7 +39,8 @@ export function simulateOrders({ n = 300, seed = 7 } = {}) {
     // The same order after Refract's suggestions: confirmed PD, clearer material when fringes
     // are the issue, and a pad frame of similar width when the fit is the issue.
     const fixedPd = r.parts.measure.level !== "low" ? { ...pd, plusMinus: 0.5 } : pd;
-    const index = r.parts.sight.level !== "low" ? INDICES.find((x) => x.n === 1.6) : undefined;
+    const clearer = INDICES.filter((x) => x.abbe > r.lens.best.abbe).sort((a, b) => b.abbe - a.abbe);
+    const index = r.parts.sight.level !== "low" && clearer.length ? clearer.find((x) => x.n === 1.6) || clearer[0] : undefined;
     const fixedFrame = r.parts.fit.level === "high" && frame.pads === "fixed"
       ? FRAMES.filter((f) => f.pads === "adjustable").reduce((a, b) => (Math.abs(b.A - frame.A) < Math.abs(a.A - frame.A) ? b : a))
       : frame;

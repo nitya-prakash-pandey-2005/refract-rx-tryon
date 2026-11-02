@@ -37,3 +37,7 @@ test("perceived fringe and acuity cost follow Winter et al. 2015", () => {
   const lines = acuityLossLines(0.2 * 30, 30); // prism 6 Δ through Abbe 30
   assert.ok(lines > 0 && lines < 1.5);
 });
+
+test("plano has an unlimited clean zone", () => {
+  assert.equal(materialSight({ sph: 0, cyl: 0, axis: 0 })[0].cleanZoneMm, Infinity);
+});
