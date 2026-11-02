@@ -91,18 +91,18 @@
 
   <script>
     var PRODUCTS = [
-      { id: "juno", name: "Juno Square", colour: "Ink black acetate", price: 110, tag: "Bestseller" },
-      { id: "halden", name: "Halden Panto", colour: "Havana tortoise", price: 95, tag: "New" },
-      { id: "mira", name: "Mira Cat-Eye", colour: "Bordeaux acetate", price: 105 },
-      { id: "kite", name: "Kite Aviator", colour: "Polished gold metal", price: 120 },
-      { id: "pico", name: "Pico Panto", colour: "Clear crystal", price: 79, tag: "Great for strong Rx" },
-      { id: "lumen", name: "Lumen Oval", colour: "Titanium", price: 129 },
+      { id: "juno", name: "Juno Square", colour: "Ink black acetate", size: "56□18 145", price: 110, tag: "Bestseller" },
+      { id: "halden", name: "Halden Panto", colour: "Havana tortoise", size: "49□20 145", price: 95, tag: "New" },
+      { id: "mira", name: "Mira Cat-Eye", colour: "Bordeaux acetate", size: "53□17 145", price: 105 },
+      { id: "kite", name: "Kite Aviator", colour: "Polished gold metal", size: "58□15 140", price: 120 },
+      { id: "pico", name: "Pico Panto", colour: "Clear crystal", size: "45□22 140", price: 79, tag: "Great for strong Rx" },
+      { id: "lumen", name: "Lumen Oval", colour: "Titanium", size: "50□19 140", price: 129 },
     ];
     var grid = document.getElementById("grid");
     grid.innerHTML = PRODUCTS.map(function (p) {
       return '<article class="card"><div class="img"><img src="/store/img/' + p.id + '.svg" alt="' + p.name + '"></div>' +
         '<div><span class="tag">' + (p.tag || "&nbsp;") + '</span><h3>' + p.name + '</h3></div>' +
-        '<div class="meta"><span>' + p.colour + '</span><span class="price">$' + p.price + '</span></div>' +
+        '<div class="meta"><span>' + p.colour + ' · <span class="size">' + p.size + '</span></span><span class="price">$' + p.price + '</span></div>' +
         '<div class="row"><button class="btn rx" data-refract-sku="' + p.id + '">Try with my Rx</button><button class="btn ghost" data-add="' + p.id + '">Add to cart</button></div></article>';
     }).join("");
 

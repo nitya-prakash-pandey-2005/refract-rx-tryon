@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ShieldCheck, Eye, Glasses, Ruler, Gauge as GaugeIcon, Sparkles, AlertTriangle, CheckCircle2, Droplets, ArrowRight, ScanSearch } from "lucide-react";
-import { Card, PageHead, Hud, Badge, Seg, Toggle, Drivers } from "../ui";
+import { ShieldCheck, Eye, Glasses, Ruler, Gauge as GaugeIcon, Sparkles, AlertTriangle, CheckCircle2, Droplets, ArrowRight, ScanSearch, Link2, Bookmark } from "lucide-react";
+import { Card, PageHead, Hud, Badge, Seg, Toggle, Drivers, toast } from "../ui";
+import { bookmarklet } from "../lib/bookmarklet";
 import { useStore, setStore } from "../state/store";
 import { navigate } from "../lib/router";
 import { countUp, useReveal } from "../lib/anim";
@@ -20,9 +21,14 @@ const PART = [
   ["measure", Ruler, "Measure", "Is your PD accurate enough?"],
 ];
 
-export default function Check({ parts }) {
+export default function Check({ parts, query = {} }) {
   const s = useStore();
   const root = useRef(null), scoreEl = useRef(null), strip = useRef(null);
+  // A shared link or the bookmarklet: #/check/custom?size=52-18-140&shape=rect&material=metal&from=site
+  const linked = parts[1] === "custom" && query.size != null ? parseFrameSize(query.size) : null;
+  useEffect(() => {
+    if (linked) setStore({ customFrame: { ...linked, shape: SHAPES.includes(query.shape) ? query.shape : "rect", material: ["metal", "titanium", "acetate"].includes(query.material) ? query.material : "acetate" } });
+  }, [query.size, query.shape, query.material]); // eslint-disable-line react-hooks/exhaustive-deps
   const frame = getFrame(parts[1]) || getFrame(s.lastFrame) || FRAMES[0];
   const [indexN, setIndexN] = useState("best");
   const [bridge, setBridge] = useState(s.bridge || "medium");
@@ -50,7 +56,8 @@ export default function Check({ parts }) {
     <div className="stack-lg" ref={root}>
       <PageHead kicker="Remake-risk check" title={frame.custom ? `Will this ${frame.A}□${frame.DBL} frame work for you?` : `Will ${frame.name} work for you?`} sub="Glasses fail after purchase in four ways. Refract predicts each one before you buy, from optics, physics and your YouCam skin scan." right={<Badge tone="violet"><ShieldCheck size={13} /> First on the web</Badge>} />
 
-      <AnyFrame spec={s.customFrame} active={Boolean(frame.custom)} />
+      {query.from && <div className={`callout row ${linked ? "" : "warn"}`} data-reveal>{linked ? <><ScanSearch size={17} color="var(--cyan)" /><span className="small">Checking the <b>{linked.A}□{linked.DBL}</b> frame you were looking at on <b>{query.from}</b>, against your prescription.</span></> : <><AlertTriangle size={17} color="var(--amber)" /><span className="small">Couldn't find a frame size on <b>{query.from}</b>. Select the size text on that page before tapping the bookmark, or type it below.</span></>}</div>}
+      <AnyFrame key={JSON.stringify(s.customFrame)} spec={s.customFrame} active={Boolean(frame.custom)} />
 
       <div className="frame-strip" ref={strip} data-reveal>
         {mine && (
@@ -134,7 +141,8 @@ export default function Check({ parts }) {
 
       <div className="row wrap" style={{ gap: 10 }} data-reveal>
         <a className="btn primary" href={`#/live/${frame.id}`}>See {frame.name} live through your lenses<ArrowRight size={16} /></a>
-        <a className="btn" href="#/retail">How retailers use this</a>
+        {frame.custom && <button className="btn" onClick={() => { const f = s.customFrame; const url = `${location.origin}/#/check/custom?${new URLSearchParams({ size: `${f.A}-${f.DBL}-${f.temple || 140}`, shape: f.shape, material: f.material })}`; navigator.clipboard?.writeText(url).then(() => toast("Link copied: anyone can open this check with their own prescription.", "ok"), () => toast(url)); }}><Link2 size={16} />Copy link to this check</button>}
+        <a className="btn" href="#/retail">How stores use this</a>
       </div>
     </div>
   );
@@ -173,6 +181,8 @@ function AnyFrame({ spec, active }) {
   const [shape, setShape] = useState(spec?.shape || "rect");
   const [material, setMaterial] = useState(spec?.material || "acetate");
   const parsed = parseFrameSize(size);
+  const bm = useRef(null);
+  useEffect(() => { bm.current?.setAttribute("href", bookmarklet(location.origin)); }, []); // React blocks javascript: URLs in props
   function go(e) {
     e.preventDefault();
     if (!parsed) return;
@@ -180,7 +190,7 @@ function AnyFrame({ spec, active }) {
     navigate("/check/custom");
   }
   return (
-    <Card className={`any-frame ${active ? "glow" : ""}`} data-reveal tour="any-frame">
+    <Card className={`any-frame ${active ? "glow" : ""}`} tour="any-frame">
       <div className="any-frame-head">
         <span className="step-ic"><ScanSearch size={17} /></span>
         <div className="grow">
@@ -197,6 +207,10 @@ function AnyFrame({ spec, active }) {
         <button className="btn primary" disabled={!parsed}><ShieldCheck size={16} />Check this frame</button>
       </form>
       {size && !parsed && <span className="tiny" style={{ color: "var(--amber)" }}>Type at least the lens width and bridge, like 52-18 (lens 33–66 mm, bridge 12–26 mm).</span>}
+      <div className="bm-row">
+        <a ref={bm} className="btn sm bm-link" onClick={(e) => { e.preventDefault(); toast("Drag this button to your bookmarks bar, then tap it on any glasses product page.", "info"); }}><Bookmark size={14} />Check with Refract</a>
+        <span className="tiny text-2"><b>One tap on any store:</b> drag this to your bookmarks bar. On any glasses product page, tap it and Refract opens with that frame's size, shape and material filled in.</span>
+      </div>
     </Card>
   );
 }

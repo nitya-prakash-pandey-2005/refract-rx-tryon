@@ -231,3 +231,6 @@ i.lg { display: inline-block; width: 12px; height: 12px; border-radius: 4px; ver
 .frame-chip.mine { border-style: dashed; border-color: var(--cyan); }
 .frame-chip.mine.on { background: var(--cyan-a, rgba(34,211,238,.1)); }
 @media (max-width: 900px) { .any-frame-form { grid-template-columns: 1fr 1fr; } .any-frame-form .btn { grid-column: 1 / -1; } }
+.bm-row { display: flex; gap: 12px; align-items: center; padding-top: 10px; border-top: 1px dashed var(--line); }
+.bm-link { flex: none; cursor: grab; border-style: dashed; }
+.callout.warn { border-color: rgba(251, 191, 36, 0.4); }
