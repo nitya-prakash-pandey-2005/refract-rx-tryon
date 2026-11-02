@@ -52,7 +52,7 @@ A WebGL2 shader re-renders your camera through your exact sphere, cylinder and a
 - **REST API:** `POST /api/v1/risk` scores one frame, or ranks the catalogue.
 - **MCP server:** AI shopping agents (Claude, ChatGPT) get Rx-aware tools: `rank_frames`, `remake_risk`, `lens_report`, `sight_by_material`. Existing eyewear MCP servers only do cart and checkout.
 - **Retailer dashboard:**
-  - a simulated order stream: 11% of orders are high risk, and Refract's fixes cut high-risk orders by 62%;
+  - a simulated order stream: 11% of orders are high risk, and Refract's fixes cut high-risk orders from 33 to 13 (−61%) and average risk by 37%;
   - an ROI calculator (7.6% redo rate × $90 per remake);
   - pricing at $49 / $199 / custom per store.
 - **Catalogue Rx audit** and an Rx-suitability feed.

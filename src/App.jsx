@@ -54,7 +54,7 @@ const TITLES = [
   ["/studio", "Studio", "Prescription-true try-on"],
   ["/agent", "Ask Refract", "Optician + makeup agent"],
   ["/bag", "Bag", "Order sheet"],
-  ["/retail", "For retailers", "Catalogue Rx audit"],
+  ["/retail", "For retailers", "Remake-risk SaaS"],
   ["/", "Refract", "Prescription-true try-on"],
 ];
 const EMBED_TABS = [["/live", "Live"], ["/check", "Fit check"], ["/studio", "Photo"], ["/rx", "My Rx"], ["/scan", "Scan"]];
