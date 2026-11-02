@@ -86,3 +86,18 @@ export function qualityChecks({ landmarks, W, H, luma }) {
   }
   return checks;
 }
+
+// Head turned too far for a frontal frame overlay (about 30°+): temples become lopsided
+// around the nose bridge.
+export function faceTurned(landmarks, limit = 0.35) {
+  const d = (a, b) => Math.hypot(landmarks[a].x - landmarks[b].x, landmarks[a].y - landmarks[b].y);
+  const l = d(LM.templeL, LM.nasion), r = d(LM.templeR, LM.nasion);
+  return Math.abs(l - r) / (l + r) > limit;
+}
+
+// With several faces in view, follow the biggest (closest) one.
+export function widestFace(faces) {
+  if (!faces?.length) return null;
+  const width = (f) => Math.max(...f.map((p) => p.x)) - Math.min(...f.map((p) => p.x));
+  return faces.reduce((a, b) => (width(b) > width(a) ? b : a));
+}

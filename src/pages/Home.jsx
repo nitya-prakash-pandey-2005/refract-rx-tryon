@@ -32,10 +32,11 @@ export default function Home() {
 
   useEffect(() => {
     if (reduced() || !title.current) return;
-    const { words } = splitText(title.current, { words: true });
+    const split = splitText(title.current, { words: true });
+    const { words } = split;
     const a = animate(words, { opacity: [0, 1], translateY: ["0.7em", 0], rotate: ["4deg", 0], duration: 800, delay: stagger(55), ease: "outExpo" });
     const b = animate(".hero-copy [data-hero]", { opacity: [0, 1], translateY: [16, 0], duration: 700, delay: stagger(90, { start: 450 }), ease: "outExpo" });
-    return () => { a.revert(); b.revert(); };
+    return () => { a.revert(); b.revert(); split.revert?.(); };
   }, []);
 
   useEffect(() => onView(impact.current, () => {

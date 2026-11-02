@@ -61,7 +61,7 @@ function texture(gl, unit) {
 
 // Returns null when WebGL2 isn't available (the page then falls back to photo mode).
 export function createWarper(canvas) {
-  const gl = canvas.getContext("webgl2", { premultipliedAlpha: false, preserveDrawingBuffer: true });
+  const gl = canvas.getContext("webgl2", { premultipliedAlpha: false });
   if (!gl) return null;
   const prog = gl.createProgram();
   gl.attachShader(prog, compile(gl, gl.VERTEX_SHADER, VS));
@@ -87,6 +87,7 @@ export function createWarper(canvas) {
   const mctx = mask.getContext("2d");
 
   return {
+    dispose() { gl.getExtension("WEBGL_lose_context")?.loseContext(); },
     render(video, W, H, uniforms, polys) {
       if (canvas.width !== W || canvas.height !== H) { canvas.width = W; canvas.height = H; }
       const k = 0.5;

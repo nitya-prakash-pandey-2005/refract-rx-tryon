@@ -146,7 +146,7 @@ i.lg { display: inline-block; width: 12px; height: 12px; border-radius: 4px; ver
 .page-head > .badge, .page-head > .chip { align-self: flex-start; width: max-content; }
 
 /* ---------- live mirror ---------- */
-.live-stage { position: relative; overflow: hidden; border-radius: var(--r-lg) var(--r-lg) 0 0; background: radial-gradient(circle at 50% 40%, var(--surface-raised), var(--bg)); max-height: 74vh; margin: 0 auto; }
+.live-stage { position: relative; overflow: hidden; border-radius: var(--r-lg) var(--r-lg) 0 0; background: radial-gradient(circle at 50% 40%, var(--surface-raised), var(--bg)); margin: 0 auto; width: 100%; max-width: calc(74vh * var(--ratio, 1.78)); }
 .live-stage video { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
 .live-stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; transition: opacity .4s; }
 .live-stage.on canvas { opacity: 1; }
@@ -162,7 +162,8 @@ i.lg { display: inline-block; width: 12px; height: 12px; border-radius: 4px; ver
 .embed-tabs a.on { background: var(--surface-2); color: var(--text); }
 .embed-main { padding: 16px; max-width: 1400px; margin: 0 auto; }
 .embed-main .page-head { display: none; }
-.embed-main .live-stage, .embed-main .studio-stage { max-height: 58vh; }
+.embed-main .live-stage { max-width: calc(58vh * var(--ratio, 1.78)); }
+.embed-main .studio-stage { max-height: 58vh; }
 
 /* ---------- home v2 ---------- */
 .hero { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 34px; padding-top: 8px; }

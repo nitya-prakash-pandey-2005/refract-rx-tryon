@@ -36,6 +36,9 @@ function StudioInner({ s, frameId }) {
   const [zoom, setZoom] = useState("face");
   const [xray, setXray] = useState(false);
   const [card, setCard] = useState(null);
+  const cardRef = useRef(null);
+  cardRef.current = card;
+  useEffect(() => () => cardRef.current && URL.revokeObjectURL(cardRef.current), []);
   const [t, setT] = useState(0);
   const pd = { left: s.measure.pd.left, right: s.measure.pd.right };
   const ranked = useMemo(
@@ -197,7 +200,7 @@ function StudioInner({ s, frameId }) {
           </Card>
         </div>
       </div>
-      <Sheet open={!!card} onClose={() => setCard(null)} title="Your Refract card">
+      <Sheet open={!!card} onClose={() => { URL.revokeObjectURL(card); setCard(null); }} title="Your Refract card">
         {card && (
           <div className="stack">
             <img src={card} alt="Refract card preview" className="card-preview" />

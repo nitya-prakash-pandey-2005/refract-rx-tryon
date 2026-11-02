@@ -6,7 +6,7 @@ import { navigate } from "../lib/router";
 import { tween } from "../lib/anim";
 import { getFrame } from "../engine/frames";
 import { rankFrames } from "../engine/fit";
-import { measureFace } from "../engine/measure";
+import { measureFace, faceTurned, widestFace } from "../engine/measure";
 import { placeFrame, lensUniforms } from "../engine/placement";
 import { getLandmarker } from "../vision/landmarker";
 import { createWarper } from "../vision/glwarp";
@@ -24,15 +24,15 @@ const inFrame = (f) => KEY_POINTS.every((i) => f[i].x > 0.01 && f[i].x < 0.99 &&
 export default function Live({ parts }) {
   const s = useStore();
   const video = useRef(null), glCanvas = useRef(null), overlay = useRef(null);
-  const stream = useRef(null), raf = useRef(0), anim = useRef(null);
+  const stream = useRef(null), raf = useRef(0), anim = useRef(null), warperRef = useRef(null);
   const [on, setOn] = useState(false);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState(null);
   const [mode, setMode] = useState("rx");
   const [xray, setXray] = useState(false);
-  const [mirror, setMirror] = useState(false);
+  const [mirror, setMirror] = useState(true); // a mirror, like every selfie camera
   const [dims, setDims] = useState({ w: 16, h: 9 });
-  const [hud, setHud] = useState({ fps: 0, pd: null, face: false });
+  const [hud, setHud] = useState({ fps: 0, pd: null, face: false, turned: false });
 
   const pd = s.measure ? { left: s.measure.pd.left, right: s.measure.pd.right } : { left: 31.5, right: 31.5 };
   const ranked = useMemo(() => rankFrames({ rx: s.rx, pd, faceWidthMm: s.measure?.faceWidthMm, faceShape: s.faceAttr?.faceShape }), [JSON.stringify(s.rx), pd.left, pd.right]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -50,7 +50,7 @@ export default function Live({ parts }) {
     stream.current = null;
     setOn(false);
   };
-  useEffect(() => () => { stop(); anim.current?.pause?.(); }, []);
+  useEffect(() => () => { stop(); anim.current?.pause?.(); warperRef.current?.dispose(); }, []);
   useEffect(() => { setStore({ lastFrame: frame.id }); }, [frame.id]);
 
   useEffect(() => {
@@ -69,7 +69,8 @@ export default function Live({ parts }) {
       const v = video.current;
       v.srcObject = st;
       await v.play();
-      const warper = createWarper(glCanvas.current);
+      warperRef.current ||= createWarper(glCanvas.current); // one GPU context per visit, reused across restarts
+      const warper = warperRef.current;
       if (!warper) throw Object.assign(new Error("This browser can't run the GPU lens (WebGL2). Use the photo Studio instead."), { name: "NoWebGL" });
       const lm = await getLandmarker("VIDEO");
       const smooth = smoother(0.55, 300);
@@ -82,13 +83,14 @@ export default function Live({ parts }) {
         const W = v.videoWidth, H = v.videoHeight, now = performance.now();
         if (W && v.readyState >= 2) {
           const res = lm.detectForVideo(v, now);
-          const face = smooth(res.faceLandmarks?.[0] || null, now);
+          const face = smooth(widestFace(res.faceLandmarks), now);
           const L = live.current;
           const o = overlay.current, ctx = o.getContext("2d");
           if (o.width !== W) { o.width = W; o.height = H; }
           ctx.clearRect(0, 0, W, H);
           let pdNow = null;
-          if (face && inFrame(face)) {
+          const turned = Boolean(face && inFrame(face) && faceTurned(face));
+          if (face && inFrame(face) && !turned) {
             const m = measureFace(face, W, H);
             mm = mm ? mm + 0.15 * (m.mmPerPx - mm) : m.mmPerPx;
             pdNow = m.pd.far;
@@ -106,7 +108,7 @@ export default function Live({ parts }) {
           if (now - hudAt > 300) {
             const fps = Math.round((frames * 1000) / (now - fpsAt));
             frames = 0; fpsAt = now; hudAt = now;
-            setHud({ fps, pd: pdNow, face: Boolean(pdNow) });
+            setHud({ fps, pd: pdNow, face: Boolean(pdNow), turned });
           }
         }
         raf.current = requestAnimationFrame(loop);
@@ -127,15 +129,16 @@ export default function Live({ parts }) {
     toast(`${frame.name} with ${lens.label} lenses added to your bag.`, "ok");
   }
 
+  // Keep the camera running until the snapshot is accepted, so a bad frame costs nothing.
   async function snapshot() {
     const v = video.current;
     const c = document.createElement("canvas");
     c.width = v.videoWidth;
     c.height = v.videoHeight;
     c.getContext("2d").drawImage(v, 0, 0);
-    stop();
     try {
       await acceptPhoto(c, "camera");
+      stop();
       toast("Snapshot taken. Fine-tune it in the Studio.", "ok");
       navigate(`/studio/${frame.id}`);
     } catch (e) {
@@ -149,7 +152,7 @@ export default function Live({ parts }) {
       <div className="grid g-12">
         <div className="span-8 stack">
           <Card className="flush" tour="live-stage">
-            <div className={`live-stage ${on ? "on" : ""} ${mirror ? "mirror" : ""}`} style={{ aspectRatio: `${dims.w} / ${dims.h}` }}>
+            <div className={`live-stage ${on ? "on" : ""} ${mirror ? "mirror" : ""}`} style={{ aspectRatio: `${dims.w} / ${dims.h}`, "--ratio": dims.w / dims.h }}>
               <video ref={video} playsInline muted />
               <canvas ref={glCanvas} className="gl" />
               <canvas ref={overlay} className="ov" />
@@ -164,7 +167,7 @@ export default function Live({ parts }) {
               {on && (
                 <div className="stage-hud">
                   <span className="mode-pill mono"><span className="pulse-dot" />{hud.fps} fps · {mode === "rx" ? `Rx ${fmtD(s.rx.od.sph)} / ${fmtD(s.rx.os.sph)}` : "showroom"}</span>
-                  <span className="mode-pill mono">{hud.face ? `eyes ${eyeChange >= 0 ? "+" : ""}${eyeChange.toFixed(1)}% · ${fit.minus ? "edge" : "centre"} ${fit.thick.toFixed(1)} mm` : "looking for your face…"}</span>
+                  <span className="mode-pill mono">{hud.face ? `eyes ${eyeChange >= 0 ? "+" : ""}${eyeChange.toFixed(1)}% · ${fit.minus ? "edge" : "centre"} ${fit.thick.toFixed(1)} mm` : hud.turned ? "face the camera straight on" : "looking for your face…"}</span>
                 </div>
               )}
               {on && hud.pd && <span className="live-pd mono">PD {hud.pd.toFixed(1)} mm · live</span>}
@@ -172,9 +175,9 @@ export default function Live({ parts }) {
             <div className="stage-controls">
               <Seg options={[{ value: "showroom", label: "Showroom" }, { value: "rx", label: "Your Rx" }]} value={mode} onChange={setMode} />
               <label className="row small" style={{ gap: 8 }}><Toggle on={xray} onChange={setXray} label="Optics X-ray" />Optics X-ray</label>
-              <button className={`btn sm ${mirror ? "" : "ghost"}`} onClick={() => setMirror((m) => !m)}><FlipHorizontal2 size={15} />{mirror ? "Mirror view" : "As others see you"}</button>
+              <button className={`btn sm ${mirror ? "" : "ghost"}`} onClick={() => setMirror((m) => !m)}><FlipHorizontal2 size={15} />{mirror ? "Show as others see you" : "Back to mirror view"}</button>
               {on ? <span className="row" style={{ gap: 8 }}>
-                <button className="btn sm primary" onClick={snapshot}><Sparkles size={15} />Snapshot to Studio</button>
+                <button className="btn sm primary" onClick={snapshot} disabled={!hud.face}><Sparkles size={15} />Snapshot to Studio</button>
                 <button className="btn sm ghost" onClick={stop} aria-label="Stop camera"><CameraOff size={15} /></button>
               </span> : null}
             </div>

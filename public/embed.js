@@ -23,13 +23,14 @@
   style.textContent = css;
   document.head.appendChild(style);
 
-  var overlay = null, lastFocus = null;
+  var overlay = null, lastFocus = null, bodyOverflow = "";
 
   function close() {
     if (!overlay) return;
     var o = overlay;
     overlay = null;
     o.classList.remove("on");
+    document.body.style.overflow = bodyOverflow;
     setTimeout(function () { o.remove(); }, 260);
     document.removeEventListener("keydown", onKey);
     if (lastFocus) lastFocus.focus();
@@ -37,8 +38,8 @@
   function onKey(e) { if (e.key === "Escape") close(); }
 
   function open(sku) {
-    if (overlay) close();
-    lastFocus = document.activeElement;
+    if (overlay) { overlay.remove(); overlay = null; } else { lastFocus = document.activeElement; bodyOverflow = document.body.style.overflow; }
+    document.body.style.overflow = "hidden";
     overlay = document.createElement("div");
     overlay.className = "rfx-overlay";
     overlay.setAttribute("role", "dialog");
@@ -63,7 +64,9 @@
 
   // The try-on tells the store what the shopper chose; the store decides what to do with it.
   window.addEventListener("message", function (e) {
-    if (e.origin !== origin || !e.data || e.data.type !== "refract:add-to-cart") return;
+    if (e.origin !== origin || !e.data) return;
+    if (e.data.type === "refract:close") return close();
+    if (e.data.type !== "refract:add-to-cart") return;
     window.dispatchEvent(new CustomEvent("refract:add-to-cart", { detail: e.data.item }));
     close();
   });

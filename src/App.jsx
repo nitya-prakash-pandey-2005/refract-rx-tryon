@@ -7,7 +7,7 @@ import { start } from "./tour/engine";
 import { Toasts } from "./ui";
 import { useStore } from "./state/store";
 import "./tour/steps";
-import { isEmbed, storeHost } from "./lib/embed";
+import { isEmbed, storeHost, bridgeEscape } from "./lib/embed";
 import Home from "./pages/Home";
 import Live from "./pages/Live";
 import Scan from "./pages/Scan";
@@ -63,6 +63,7 @@ export default function App() {
   const base = "/" + (route.parts[0] || "");
   const Page = ROUTES[base] || Home;
   useEffect(() => { window.scrollTo(0, 0); }, [base]);
+  useEffect(() => bridgeEscape(), []);
   if (isEmbed()) {
     return (
       <div className="embed-shell">
