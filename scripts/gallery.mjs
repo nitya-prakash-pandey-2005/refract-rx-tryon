@@ -69,12 +69,20 @@ await p.waitForNavigation({ waitUntil: "networkidle0" }).catch(() => {});
 await go("/check/juno", 2500);
 await scrollTo(".risk-hero", 84); await shot("10-fit-check");
 await scrollTo(".sight-sim", 200, 800); await shot("11-sight-simulator");
+await scrollTo(".dayring", 200, 2400); await shot("29-fit-through-day");
 await go("/studio/mira", 300); await click(".seg button", "Rx-tuned look"); await wait(3500); await shot("16-photo-try-on");
 await go("/frames", 1800); await shot("19-frames-ranked");
 await go("/agent", 600); await click(".suggest", "oversized"); await wait(2600); await shot("20-ask-refract-agent");
 await go("/retail", 5000); await shot("21-store-dashboard");
 await click("button", "Try the live API"); await wait(1500);
 await scrollTo(".api-out", 380, 600); await shot("22-api-and-mcp");
+// ---- the science (v5) ----
+await go("/lab", 2400); await shot("24-lens-lab-material");
+await scrollTo(".coating", 150, 1800); await shot("25-lens-lab-coating");
+await scrollTo(".photochromic", 150, 3600); await shot("26-lens-lab-photochromic");
+await go("/kids", 4200); await shot("27-kids-forecast");
+await go("/value", 2800); await shot("28-best-value");
+await go("/", 1200); await scrollTo(".sci-card", 260, 2000); await shot("30-science");
 await persona("Helen");
 await go("/profile", 2500); await shot("17-youcam-analysis");
 

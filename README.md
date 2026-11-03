@@ -40,6 +40,17 @@ Built for the *YouCam API Skin AI & eCommerce VTO Hackathon* (eCommerce VTO trac
 | **Ask Refract** | An agent (Claude `claude-opus-5-5`, tool use) whose every number is a visible tool call to the same engine. Without a key, a built-in planner answers with the same tools. |
 | **Shortlist** | A lens report (frame, index, coatings, Rx, mono PD with tolerance, predicted edge) to take to any shop or optician, plus a shareable 1080×1350 card. |
 
+## The science inside (v5)
+
+| Page | What it computes |
+|---|---|
+| **Lens Lab** (`#/lab`) | **Physics:** ray-traced prism dispersion (Snell + Cauchy), Fresnel reflection, a transfer-matrix thin-film solver that designs a 4-layer SiO₂/ZrO₂ anti-reflective coating and shows its residual colour through the CIE 1931 observer. **Chemistry:** why sulfur makes lenses thin but colourful (Lorentz–Lorenz), and photochromic kinetics (UV activation, Arrhenius fade calibrated to measured lenses, windshield UV). **Evidence:** blue-light filters vs the 2023 Cochrane review. Each card ends in a verdict for your prescription. |
+| **Kids' eyes** (`#/kids`) | **Biology:** a child's myopia forecast to 18 from the Donovan 2012 meta-analysis, age slowing and COMET stabilization, with DIMS, HAL, ortho-k and atropine trial effects. Shows an animated growing eye and the glasses the child would wear, plus lifetime maculopathy risk per dioptre avoided. Calibrated: a European 9-year-old at −2 lands on COMET's −4.87 D. |
+| **Best value** (`#/value`) | **Math:** all 60 frame × lens combinations on a price/remake-risk plane, the Pareto frontier and its knee. |
+| **Fit through your day** (Check a pair) | **Skin biology + statistics:** sebum rises about 10% per °C of skin temperature, so a seeded Monte Carlo (head posture × temperature, 7,200 runs) shows when the frame creeps down, hour by hour. It can use today's forecast. |
+
+Constants, sources and caveats: [docs/EVIDENCE.md](docs/EVIDENCE.md#v5-science-models-branch-v5-science).
+
 ## YouCam APIs used
 
 All calls go through our server (the key never reaches the browser) on the India-reachable host `https://yce-api-01.makeupar.com`, using the full File API → task → poll flow:
@@ -66,7 +77,7 @@ About 35–40 units per full profile. The app keeps a units ledger, and the face
 npm install
 cp .env.example .env        # add YOUCAM_API_KEY (and optionally ANTHROPIC_API_KEY)
 npm run dev                 # http://localhost:5190 (app + API on one port)
-npm test                    # 97 tests: optics, sight, slip physics, remake risk, any-frame sizes, bookmarklet, PD, makeup, placement, API routes, MCP (real client), agent, limits
+npm test                    # 121 tests: optics, thin films, colour, dispersion, photochromic kinetics, myopia forecast, climate Monte Carlo, Pareto, sight, slip physics, remake risk, any-frame sizes, bookmarklet, PD, API, MCP, agent
 npm run mcp                 # MCP server over stdio for Claude / ChatGPT / any MCP client
 npm run build               # production build in dist/
 ```

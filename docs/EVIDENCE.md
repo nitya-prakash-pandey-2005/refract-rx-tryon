@@ -130,3 +130,64 @@ Frames carry "lens width □ bridge temple" on the arm (boxing system, mm). The 
 **Frame weight** is estimated per mm of lens width: metal 0.29 g, titanium 0.20 g, acetate 0.49 g (catalogue fit). Metal and titanium frames get adjustable pads; acetate gets a fixed bridge.
 
 **The bookmarklet** reads the size from the selected text, or else from the first size on the page. It reads shape and material from the selection, the page title and the `<h1>`. When no size is found, the app says so instead of guessing.
+
+## v5 science models (branch `v5-science`)
+
+Every constant below is in code (`src/engine/light.js`, `photochromic.js`, `myopia.js`, `climate.js`, `value.js`) and covered by unit tests. Where sources disagree or a value is a model assumption, it says so.
+
+### Light and lens materials (`light.js`)
+
+| Quantity | Model / value | Source |
+|---|---|---|
+| Reflection per surface | Fresnel, normal incidence: ((n−1)/(n+1))². 4.0% at 1.50, 5.3% at 1.60, 7.3% at 1.74 | Textbook optics |
+| Uncoated pair | 2R/(1+R) per lens (incoherent multiple reflections): 7.7% at 1.50, 13.6% at 1.74 | Textbook optics |
+| Thin films | Characteristic-matrix method at normal incidence | Macleod, *Thin-Film Optical Filters* |
+| AR design | Four SiO₂ (1.46) / ZrO₂ (2.05) layers, thicknesses found by coordinate descent minimizing daylight-weighted reflectance from 420 to 680 nm. Result: 0.13–0.17% per surface | Engine. Layer indices are handbook values. Trade sources give under 1% total for premium coatings |
+| Residual colour | CIE 1931 2° observer (Wyman, Sloan & Shirley 2013 multi-lobe fit), daylight as a 6504 K black body, sRGB | CIE; JCGT 2013 |
+| Dispersion | Cauchy n(λ) = A + B/λ², fitted to n_d and the Abbe number | Textbook optics |
+| Index vs Abbe | Lorentz–Lorenz: (n²−1)/(n²+2) is polarizability per volume. Sulfur and aromatic groups raise it, and the same UV-edge transitions raise dispersion | Liu & Ueda, *J Mater Chem* 2009; Mazumder et al., *ACS Omega* 2024 |
+| Materials | CR-39 1.50/58 · PC 1.59/30 · MR-8 1.60/41 · MR-7 1.67/31–32 · 1.74/32 | Mitsui MR datasheet |
+
+### Blue-light filters
+- **Evidence:** Singh et al., *Cochrane Database Syst Rev* 2023 (CD013244), 17 RCTs. They probably make no difference to short-term eye strain (low certainty). Results for sleep are inconsistent (very low certainty). There are no studies on macular health.
+- **How much they filter:** typical clear filters remove about 10–25% of blue light. Calculated phototoxicity falls by 10.6–23.6% (Leung et al., *PLoS ONE* 2017).
+
+### Photochromic lenses (`photochromic.js`)
+- **Model:**
+  - dc/dt = k_act·UV·(1−c) − k_fade(T)·c, with Arrhenius k_fade and Beer–Lambert transmission.
+  - Calibrated to Moon et al., *PLoS ONE* 2020 (12 lenses): fade half-lives of 38–198 s at 21 °C, and 2.7–5.4× slower at 6 °C.
+  - We model a fast lens: half-life 45 s at 21 °C and 261 s at 6 °C.
+- **Activation energy:** about 80 kJ/mol, because fading roughly triples per 10 °C. Dyes measured in solution give 63–82 kJ/mol. No value measured in a lens polymer was found.
+- **Windshields:** they block about 96% of UVA (Boxer Wachler, *JAMA Ophthalmol* 2016). Side windows block 44–96%.
+
+### Children's myopia (`myopia.js`)
+| Quantity | Value | Source |
+|---|---|---|
+| Progression at age 9.3, single vision | −0.82 D/yr Asian (CI 0.71–0.93), −0.55 D/yr European (0.39–0.72) | Donovan et al., *Optom Vis Sci* 2012 |
+| Slowing with age | 9.7% per year of age | Smotherman et al., *IOVS* 2023 (meta-regression abstract) |
+| Stabilization | Mean age 15.6 y, at −4.87 D. 48% stabilized by 15, 77% by 18 (logistic fit, applied from 13) | COMET, Hardy et al., *IOVS* 2013. The percentages come from a secondary source |
+| Parents | Two myopic parents meant about 1 D more at stabilization. Modelled as 13.5% faster per parent | COMET 2013 |
+| DIMS lenses | 52% less progression over 2 y; sustained to 6 y without rebound (small n) | Lam et al., *BJO* 2020; *Sci Rep* 2023 |
+| HAL lenses | 55% less over 2 y; 67% with ≥12 h/day wear (self-reported, sponsor-affiliated authors) | Bao et al., *JAMA Ophthalmol* 2022 |
+| Ortho-k | 43% less axial growth over 2 y | ROMIO, Cho & Cheung, *IOVS* 2012 |
+| Atropine 0.05% | 67% less progression over 1 y (0.01%: 27%, not significant for axial length) | LAMP, Yam et al., *Ophthalmology* 2019 |
+| Eye length | Emmetropic adult about 23.5 mm; about 2.5 D per mm (adults 2.9, children nearer 2) | Atchison et al., *IOVS* 2004; COMET |
+| Each dioptre | Maculopathy prevalence ×1.67 per D, so 1 D less is about 40% lower risk | Bullimore & Brennan, *Optom Vis Sci* 2019 (modelled from population data) |
+| Outdoor time | +40 min/day: incidence over 3 y 30.4% vs 39.5%; little effect once myopic | He et al., *JAMA* 2015; Wu et al., *Ophthalmology* 2013 |
+
+**Calibration check:** a European 9-year-old at −2 D projects to −4.87 D at 18, matching COMET's mean at stabilization. The trials ran 1–3 years; the forecast assumes their effect holds until progression stops.
+
+### Fit through the day (`climate.js`)
+- **Sebum and temperature:**
+  - Sebum excretion changes about 10% per °C of skin temperature (Cunliffe, Burton & Shuster, *Br J Dermatol* 1970, as quoted by Schaefer 1973).
+  - Seasonal direction is disputed (Youn 2005 vs Galzote 2014), so we use only temperature.
+- **Model assumption:** nose-skin temperature moves 0.3 °C per °C of air.
+- **Monte Carlo:**
+  - Each hour gets 300 seeded samples.
+  - Head pitch is drawn as N(20°, 12°), clipped to 0–55°; skin temperature varies ±1.5 °C.
+  - It reports the expected hours with slip margin below 1.
+- **Today's weather:** Open-Meteo hourly forecast, requested only on a click, with coordinates rounded to 0.1°.
+
+### Best value (`value.js`)
+- **Frontier:** the Pareto frontier of (frame + lens price, remake risk) over all 12 frames × 5 lenses.
+- **Knee:** the frontier point furthest from the chord between its ends, with both axes normalized.
