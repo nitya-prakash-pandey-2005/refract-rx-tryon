@@ -34,7 +34,7 @@ export default function Check({ parts, query = {} }) {
     if (linked) setStore({ customFrame: { ...linked, B: B >= 20 && B <= 60 ? B : undefined, shape: normShape(query.shape) || "rect", material: normMaterial(query.material) || "acetate" } });
   }, [query.size, query.shape, query.material, query.B]); // eslint-disable-line react-hooks/exhaustive-deps
   const frame = (!failed && getFrame(parts[1])) || (s.lastFrame !== "custom" && getFrame(s.lastFrame)) || FRAMES[0];
-  const [indexN, setIndexN] = useState("best");
+  const [indexN, setIndexN] = useState(INDICES.some((i) => i.n === Number(query.index)) ? Number(query.index) : "best");
   const [bridge, setBridge] = useState(s.bridge || "medium");
   const [oil, setOil] = useState(s.skin?.oiliness ?? 60);
   const [pdKnown, setPdKnown] = useState(false);
