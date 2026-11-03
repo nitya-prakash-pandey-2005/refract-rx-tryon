@@ -13,7 +13,7 @@ const curve = (T) => `M${LS.map((l) => `${xs(l).toFixed(1)} ${ys(T(l)).toFixed(1
 const RAINBOW = [400, 440, 480, 520, 560, 600, 640, 680, 720].map((l) => [((l - L0) / (L1 - L0)) * 100, toCss(spectrumColor((x) => Math.exp(-0.5 * ((x - l) / 12) ** 2)).hue)]);
 
 export default function BlueLight() {
-  const [block, setBlock] = useState(0.3);
+  const [block, setBlock] = useState(0.2);
   const root = useRef(null);
   const f = filterTint(block);
   const tint = toCss(f.rgb);

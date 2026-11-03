@@ -83,7 +83,7 @@ export default function Lab() {
       <section data-section>
         <Card title="2 · Anti-reflective coating: light you lose and glare others see" icon={Layers} right={<Hud tone="pink">Fresnel · thin-film interference · CIE 1931</Hud>} data-reveal>
           <Coating mat={mat} />
-          <p className="small text-2">Every surface between air and plastic reflects ((n−1)/(n+1))² of the light, more for high-index plastics. A coating a quarter-wavelength thick makes the reflection from its top and bottom cancel; four alternating SiO₂/ZrO₂ layers, with thicknesses optimized here by the engine, cancel it across the whole visible spectrum. The leftover reflection at the blue and red ends is the coloured sheen you see on coated lenses.</p>
+          <p className="small text-2">Every surface between air and plastic reflects ((n−1)/(n+1))² of the light, more for high-index plastics. A coating a quarter-wavelength thick makes the reflection from its top and bottom cancel; four alternating SiO₂/ZrO₂ layers, with thicknesses optimized here by the engine, cancel it across the whole visible spectrum. The leftover reflection at the blue and red ends is the coloured sheen you see on coated lenses: this design leaves a violet one; commercial coatings are often tuned to leave a green one instead.</p>
           <Verdict tone="good" icon={ThumbsUp}>{`Uncoated, your ${mat.label.split(" ")[0]} pair reflects ${(bareMine * 100).toFixed(1)}% of light: ghost images at night and eyes hidden in photos. Coated, about ${(arMine * 100).toFixed(1)}%. `}<b>Always get AR</b>{mat.n >= 1.6 ? ", and it should be included at this price." : "."}</Verdict>
         </Card>
       </section>
@@ -91,7 +91,7 @@ export default function Lab() {
       <section data-section>
         <Card title="3 · Blue-light filters" icon={Sparkles} right={<Hud tone="pink">spectral transmission · evidence</Hud>} data-reveal>
           <BlueLight />
-          <p className="small text-2">A Cochrane systematic review of 17 randomized trials (Singh et al., 2023) found that blue-light filtering lenses <b>may make no difference to eye strain</b> from screen use in the short term, with no clear effect on sleep and no evidence on macular health. Screens emit far less blue light than daylight.</p>
+          <p className="small text-2">A Cochrane systematic review of 17 randomized trials (Singh et al., 2023) found that blue-light filtering lenses <b>probably make no difference to eye strain</b> from screen use in the short term (low-certainty evidence), with inconsistent results for sleep and no studies at all on macular health. Typical clear filters remove only about 10–25% of blue light (Leung et al., PLoS ONE 2017).</p>
           <Verdict tone="good" icon={ThumbsDown}><b>Skip it</b> unless you like the look: you pay for a slight yellow tint, not for less eye strain.</Verdict>
         </Card>
       </section>

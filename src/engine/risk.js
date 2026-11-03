@@ -33,10 +33,10 @@ const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const r1 = (v) => Math.round(v * 10) / 10;
 const level = (x, med, high) => (x >= high ? "high" : x >= med ? "medium" : "low");
 
-export function slipRisk({ frame, lensWeightG, face = {}, oiliness = 60, power = 1 }) {
+export function slipRisk({ frame, lensWeightG, face = {}, oiliness = 60, power = 1, pitchDeg = FIT.phonePitchDeg }) {
   const totalWeightG = (frame.weightG ?? 22) + lensWeightG;
   const Wn = (totalWeightG / 1000) * G * FIT.noseShare;
-  const th = ((FIT.slopeDeg + FIT.phonePitchDeg) * Math.PI) / 180; // evaluated in phone posture
+  const th = ((FIT.slopeDeg + pitchDeg) * Math.PI) / 180; // evaluated in phone posture by default
   const pads = frame.pads || "fixed";
   const oil = 1 - FIT.oilLoss[pads] * (1 - clamp(oiliness, 0, 100) / 100); // oiliness score: higher = less oily
   const bridgeKey = face.bridge || "medium";

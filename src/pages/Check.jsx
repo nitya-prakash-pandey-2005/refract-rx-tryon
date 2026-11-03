@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ShieldCheck, Eye, Glasses, Ruler, Gauge as GaugeIcon, Sparkles, AlertTriangle, CheckCircle2, Droplets, ArrowRight, ScanSearch, Link2, Bookmark } from "lucide-react";
+import { ShieldCheck, Eye, Glasses, Ruler, Gauge as GaugeIcon, Sparkles, AlertTriangle, CheckCircle2, Droplets, ArrowRight, ScanSearch, Link2, Bookmark, Sun } from "lucide-react";
 import { Card, PageHead, Hud, Badge, Seg, Toggle, Drivers, toast } from "../ui";
 import { bookmarklet } from "../lib/bookmarklet";
 import { useStore, setStore } from "../state/store";
@@ -12,6 +12,7 @@ import { remakeRisk } from "../engine/risk";
 import { materialSight } from "../engine/sight";
 import FrameArt from "../components/FrameArt";
 import SightSim from "../components/SightSim";
+import DayRing from "../components/DayRing";
 
 const TONE = { low: "green", medium: "amber", high: "rose" };
 const WORD = { low: "Low risk", medium: "Some risk", high: "High risk" };
@@ -144,6 +145,10 @@ export default function Check({ parts, query = {} }) {
           </div>
         </Card>
       </div>
+
+      <Card title="Fit through your day" icon={Sun} right={<Hud tone="pink">skin biology · Monte Carlo</Hud>} data-reveal>
+        <DayRing frame={frame} lensWeightG={slip.totalWeightG - (frame.weightG ?? 22)} face={face} score={oil} />
+      </Card>
 
       <div className="row wrap" style={{ gap: 10 }} data-reveal>
         <a className="btn primary" href={`#/live/${frame.id}`}>See {frame.name} live through your lenses<ArrowRight size={16} /></a>

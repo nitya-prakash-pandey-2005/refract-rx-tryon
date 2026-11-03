@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Home as HomeIcon, ScanFace, Glasses, Sparkles, MessageCircle, Ruler, UserRound, ListChecks, Store, PlayCircle, Aperture, ShieldCheck, Trophy, FlaskConical } from "lucide-react";
+import { Home as HomeIcon, ScanFace, Glasses, Sparkles, MessageCircle, Ruler, UserRound, ListChecks, Store, PlayCircle, Aperture, ShieldCheck, Trophy, FlaskConical, Baby } from "lucide-react";
 import { useRoute } from "./lib/router";
 import AppShell from "./shell/AppShell";
 import Tour from "./tour/Tour";
@@ -21,6 +21,7 @@ import Bag from "./pages/Bag";
 import Retail from "./pages/Retail";
 import Lab from "./pages/Lab";
 import Value from "./pages/Value";
+import Kids from "./pages/Kids";
 
 const NAV = [
   { group: "Check glasses", items: [
@@ -28,9 +29,12 @@ const NAV = [
     { to: "/check", label: "Check a pair", icon: ShieldCheck },
     { to: "/live", label: "Live Rx Mirror", icon: Aperture },
     { to: "/value", label: "Best value", icon: Trophy },
-    { to: "/lab", label: "Lens Lab", icon: FlaskConical },
     { to: "/studio", label: "Photo try-on", icon: Sparkles },
     { to: "/agent", label: "Ask Refract", icon: MessageCircle },
+  ] },
+  { group: "Science", items: [
+    { to: "/lab", label: "Lens Lab", icon: FlaskConical },
+    { to: "/kids", label: "Kids' eyes", icon: Baby },
   ] },
   { group: "Your details", items: [
     { to: "/rx", label: "Prescription", icon: Ruler },
@@ -57,6 +61,7 @@ const TITLES = [
   ["/live", "Live Rx Mirror", "Real-time prescription try-on"],
   ["/value", "Best value", "Price vs risk, every combination"],
   ["/lab", "Lens Lab", "What lens upgrades really do"],
+  ["/kids", "Kids' eyes", "Myopia forecast for parents"],
   ["/scan", "Scan", "Measure your face"],
   ["/rx", "Prescription", "Your lenses"],
   ["/profile", "YouCam analysis", "Your face and skin, measured by YouCam"],
@@ -68,7 +73,7 @@ const TITLES = [
   ["/", "Refract", "A free second opinion for any glasses"],
 ];
 const EMBED_TABS = [["/live", "Live"], ["/check", "Check"], ["/studio", "Photo"], ["/rx", "My Rx"], ["/scan", "Scan"]];
-const ROUTES = { "/": Home, "/live": Live, "/check": Check, "/scan": Scan, "/rx": Rx, "/profile": Profile, "/frames": Frames, "/studio": Studio, "/agent": Agent, "/bag": Bag, "/retail": Retail, "/lab": Lab, "/value": Value };
+const ROUTES = { "/": Home, "/live": Live, "/check": Check, "/scan": Scan, "/rx": Rx, "/profile": Profile, "/frames": Frames, "/studio": Studio, "/agent": Agent, "/bag": Bag, "/retail": Retail, "/lab": Lab, "/value": Value, "/kids": Kids };
 
 export default function App() {
   const route = useRoute();

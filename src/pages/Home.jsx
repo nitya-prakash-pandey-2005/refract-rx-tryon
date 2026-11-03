@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowRight, Aperture, ShieldCheck, Store, Lock, FlaskConical, Github, Scale, Check, X, Minus, ScanEye, Droplets, Palette, Bot, Sparkles, Ruler, ScanSearch, Eye, BadgeDollarSign, ChevronDown } from "lucide-react";
-import { animate, stagger, splitText, scrambleText, spring } from "animejs";
+import { animate, stagger, splitText, scrambleText, spring, createScope, createTimeline, onScroll, svg } from "animejs";
 import { Card, Hud, Badge, Seg } from "../ui";
 import { reduced, onView, countUp, useScrollReveal } from "../lib/anim";
 import { getFrame } from "../engine/frames";
@@ -124,6 +124,8 @@ export default function Home() {
       </section>
 
       <Savings />
+
+      <ScienceStrip />
 
       <section className="stack" data-section>
         <div className="section-head center">
@@ -314,5 +316,62 @@ function Faq({ q, a }) {
       <button className="faq-q" onClick={toggle} aria-expanded={open}><span>{q}</span><ChevronDown size={18} /></button>
       <div className="faq-a" ref={body}><p className="small text-2">{a}</p></div>
     </div>
+  );
+}
+
+// "Deeper than a try-on": one looping anime.js timeline per science, played only while on screen.
+const SCIENCE = [
+  { k: "Physics", t: "Light, computed", b: "Ray tracing, Fresnel reflection and thin-film interference show what each lens and coating really does.", to: "#/lab", cta: "Lens Lab" },
+  { k: "Chemistry", t: "Molecules, explained", b: "Why sulfur makes lenses thin but colourful, and why light-reactive lenses stay pale in the heat and in your car.", to: "#/lab", cta: "Lens Lab" },
+  { k: "Biology", t: "Eyes that grow, skin that shines", b: "A child's myopia forecast from published data, and how your skin's oil through the day changes the fit.", to: "#/kids", cta: "Kids' eyes" },
+  { k: "Math", t: "Choices, optimised", b: "Every frame and lens for your prescription on one price/risk frontier, plus Monte Carlo for your day.", to: "#/value", cta: "Best value" },
+];
+function ScienceStrip() {
+  const root = useRef(null);
+  useEffect(() => {
+    const el = root.current;
+    if (!el || reduced()) return;
+    const scope = createScope({ root: el }).add(() => {
+      const play = () => onScroll({ target: el, enter: "bottom top", leave: "top bottom", sync: "play pause" });
+      createTimeline({ loop: true, alternate: true, autoplay: play() })
+        .add(".sx-ray", { x2: (_, i) => 190, y2: (_, i) => 62 + i * 9, duration: 1400, ease: "inOutSine" }, 0);
+      createTimeline({ loop: true, autoplay: play() })
+        .add(".sx-sun", { scale: [0.8, 1.15, 0.8], duration: 2400, ease: "inOutSine" }, 0)
+        .add(".sx-tint", { opacity: [0, 0.75], duration: 900, ease: "outQuad" }, 200)
+        .add(".sx-tint", { opacity: 0, duration: 1100, ease: "inQuad" }, 1500);
+      createTimeline({ loop: true, alternate: true, autoplay: play() })
+        .add(".sx-eye", { rx: [44, 62], cx: [96, 114], duration: 1600, ease: "inOutQuad" }, 0)
+        .add(".sx-retina", { translateX: [0, 36], duration: 1600, ease: "inOutQuad" }, 0);
+      createTimeline({ loop: true, autoplay: play(), loopDelay: 600 })
+        .add(".sx-dot", { scale: [0, 1], duration: 400, delay: stagger(60), ease: "outBack" }, 0)
+        .add(svg.createDrawable(".sx-front"), { draw: ["0 0", "0 1"], duration: 900, ease: "inOutQuad" }, 700);
+    });
+    return () => scope.revert();
+  }, []);
+  const dots = [[24, 30], [40, 70], [52, 44], [66, 82], [78, 58], [92, 88], [104, 40], [118, 76], [130, 92], [146, 64], [160, 96], [176, 84], [36, 52], [88, 66]];
+  return (
+    <section className="stack" data-section ref={root}>
+      <div className="section-head center">
+        <span data-reveal><Hud tone="violet">Deeper than a try-on</Hud></span>
+        <h2 data-reveal>Physics, chemistry, biology and math, not adjectives.</h2>
+        <p className="text-2" data-reveal>Every claim a store makes about a lens can be computed. Refract does the computing and shows its working.</p>
+      </div>
+      <div className="grid g4">
+        {SCIENCE.map((x, i) => (
+          <Card key={x.k} className="sci-card interactive" data-reveal>
+            <svg viewBox="0 0 200 110" className="sci-svg" aria-hidden="true">
+              {i === 0 && <g><polygon points="70,20 40,92 100,92" fill="rgba(34,211,238,.18)" stroke="var(--cyan)" /><line x1="0" y1="66" x2="58" y2="58" stroke="#fff" strokeWidth="2" />{["#ff3355", "#ffb020", "#3dfc8a", "#3d8bff", "#9b6bff"].map((c, j) => <line key={c} className="sx-ray" x1="84" y1="60" x2="190" y2={66 + j * 3} stroke={c} strokeWidth="2" />)}</g>}
+              {i === 1 && <g><circle className="sx-sun" cx="160" cy="26" r="13" fill="#ffd34d" style={{ transformBox: "fill-box", transformOrigin: "center" }} /><ellipse cx="80" cy="60" rx="52" ry="36" fill="rgba(255,255,255,.08)" stroke="var(--text-2)" strokeWidth="3" /><ellipse className="sx-tint" cx="80" cy="60" rx="50" ry="34" fill="#3a2f2a" opacity="0" /></g>}
+              {i === 2 && <g><ellipse className="sx-eye" cx="96" cy="55" rx="44" ry="40" fill="rgba(255,255,255,.05)" stroke="var(--cyan)" strokeWidth="2" /><line x1="0" y1="40" x2="62" y2="40" stroke="#fff" opacity=".6" /><line x1="0" y1="70" x2="62" y2="70" stroke="#fff" opacity=".6" /><line x1="62" y1="40" x2="138" y2="55" stroke="#fff" opacity=".6" /><line x1="62" y1="70" x2="138" y2="55" stroke="#fff" opacity=".6" /><path className="sx-retina" d="M136 24 Q146 55 136 86" fill="none" stroke="var(--pink)" strokeWidth="3" /></g>}
+              {i === 3 && <g>{dots.map(([x, y]) => <circle key={`${x}${y}`} className="sx-dot" cx={x} cy={y} r="4" fill="var(--rose)" opacity=".6" style={{ transformBox: "fill-box", transformOrigin: "center" }} />)}<path className="sx-front" d="M24 30 L36 52 L52 44" fill="none" /><path className="sx-front" d="M24 30 L52 44 L104 40" fill="none" stroke="var(--cyan)" strokeWidth="2.5" /></g>}
+            </svg>
+            <Hud tone="pink">{x.k}</Hud>
+            <b>{x.t}</b>
+            <p className="small text-2">{x.b}</p>
+            <a className="btn sm" href={x.to}>{x.cta}<ArrowRight size={14} /></a>
+          </Card>
+        ))}
+      </div>
+    </section>
   );
 }
